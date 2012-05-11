@@ -1,5 +1,9 @@
 package model;
 
+/**
+ * @author Ricardas Risys
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +35,15 @@ public class SubProcess {
 		this(order, name, minTime, idealTime, 0);
 	}
 
+	/**
+	 * Constructor
+	 * 
+	 * @param order
+	 * @param name
+	 * @param minTime
+	 * @param idealTime
+	 * @param maxTime
+	 */
 	public SubProcess(int order, String name, int minTime, int idealTime,
 			int maxTime) {
 		setOrder(order);
@@ -84,6 +97,11 @@ public class SubProcess {
 		return new ArrayList<Stock>(stocks);
 	}
 
+	/**
+	 * Link is bidirectional and maintained from both sides
+	 * 
+	 * @param stock
+	 */
 	public void addStock(Stock stock) {
 		if (!this.stocks.contains(stock)) {
 			this.stocks.add(stock);
@@ -91,6 +109,11 @@ public class SubProcess {
 		}
 	}
 
+	/**
+	 * Link is bidirectional and maintained from both sides
+	 * 
+	 * @param stock
+	 */
 	public void removeStock(Stock stock) {
 		if (this.stocks.contains(stock)) {
 			this.stocks.remove(stock);

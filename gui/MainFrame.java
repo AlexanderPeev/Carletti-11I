@@ -19,7 +19,7 @@ public class MainFrame extends JFrame {
 	NotificationsPanel notificationsPanel = new NotificationsPanel(this);
 	DashboardPanel dashboardPanel = new DashboardPanel(this);
 	ProductsPanel productsPanel = new ProductsPanel(this);
-	TraysCPanel traysCPanel = new TraysCPanel(this);
+	TraysCDialog traysCDialog = new TraysCDialog(this);
 	StatisticsAveragePickingTimesPanel statisticsAveragePickingTimesPanel = new StatisticsAveragePickingTimesPanel(
 			this);
 	StatisticsPercentageOfWastePanel statisticsPercentageOfWastePanel = new StatisticsPercentageOfWastePanel(
@@ -38,39 +38,49 @@ public class MainFrame extends JFrame {
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
-		mntmDashboard = new JMenuItem("Dashboard");
-		mntmDashboard.setMnemonic('D');
-		mntmDashboard.addActionListener(controller);
-		menuBar.add(mntmDashboard);
+		if (user.canAccess("Dashboard")) {
+			mntmDashboard = new JMenuItem("Dashboard");
+			mntmDashboard.setMnemonic('D');
+			mntmDashboard.addActionListener(controller);
+			menuBar.add(mntmDashboard);
+		}
 
-		mntmProducts = new JMenuItem("Products");
-		mntmProducts.setMnemonic('P');
-		mntmProducts.addActionListener(controller);
-		menuBar.add(mntmProducts);
+		if (user.canAccess("Products")) {
+			mntmProducts = new JMenuItem("Products");
+			mntmProducts.setMnemonic('P');
+			mntmProducts.addActionListener(controller);
+			menuBar.add(mntmProducts);
+		}
 
-		JMenu mnStatistics = new JMenu("Statistics");
-		mnStatistics.setMnemonic('S');
-		menuBar.add(mnStatistics);
+		if (user.canAccess("Statistics")) {
+			JMenu mnStatistics = new JMenu("Statistics");
+			mnStatistics.setMnemonic('S');
+			menuBar.add(mnStatistics);
 
-		mntmPercentageOfWaste = new JMenuItem("Percentage of Waste");
-		mntmPercentageOfWaste.setMnemonic('W');
-		mntmPercentageOfWaste.addActionListener(controller);
-		mnStatistics.add(mntmPercentageOfWaste);
+			mntmPercentageOfWaste = new JMenuItem("Percentage of Waste");
+			mntmPercentageOfWaste.setMnemonic('W');
+			mntmPercentageOfWaste.addActionListener(controller);
+			mnStatistics.add(mntmPercentageOfWaste);
 
-		mntmAveragePickingTimes = new JMenuItem("Average Picking Times");
-		mntmAveragePickingTimes.setMnemonic('A');
-		mntmAveragePickingTimes.addActionListener(controller);
-		mnStatistics.add(mntmAveragePickingTimes);
+			mntmAveragePickingTimes = new JMenuItem("Average Picking Times");
+			mntmAveragePickingTimes.setMnemonic('A');
+			mntmAveragePickingTimes.addActionListener(controller);
+			mnStatistics.add(mntmAveragePickingTimes);
+		}
 
-		mntmCreateTrays = new JMenuItem("Create Trays");
-		mntmCreateTrays.setMnemonic('T');
-		mntmCreateTrays.addActionListener(controller);
-		menuBar.add(mntmCreateTrays);
+		if (user.canAccess("Create Trays")) {
+			mntmCreateTrays = new JMenuItem("Create Trays");
+			mntmCreateTrays.setMnemonic('T');
+			mntmCreateTrays.addActionListener(controller);
+			menuBar.add(mntmCreateTrays);
+		}
 
-		mntmLogout = new JMenuItem("Logout");
-		mntmLogout.setMnemonic('L');
-		mntmLogout.addActionListener(controller);
-		menuBar.add(mntmLogout);
+		if (user.canAccess("Logout")) {
+			mntmLogout = new JMenuItem("Logout");
+			mntmLogout.setMnemonic('L');
+			mntmLogout.addActionListener(controller);
+			menuBar.add(mntmLogout);
+		}
 
 		this.add(notificationsPanel, BorderLayout.NORTH);
 
@@ -89,8 +99,8 @@ public class MainFrame extends JFrame {
 		return this.productsPanel;
 	}
 
-	public TraysCPanel getTraysCPanel() {
-		return this.traysCPanel;
+	public TraysCDialog getTraysCDialog() {
+		return this.traysCDialog;
 	}
 
 	public StatisticsAveragePickingTimesPanel getStatisticsAveragePickingTimesPanel() {
@@ -111,7 +121,7 @@ public class MainFrame extends JFrame {
 			else if (src == MainFrame.this.mntmProducts) MainFrame.this
 					.navigateTo(MainFrame.this.getProductsPanel());
 			else if (src == MainFrame.this.mntmCreateTrays) MainFrame.this
-					.navigateTo(MainFrame.this.getTraysCPanel());
+					.getTraysCDialog().setVisible(true);
 			else if (src == MainFrame.this.mntmAveragePickingTimes) MainFrame.this
 					.navigateTo(MainFrame.this
 							.getStatisticsAveragePickingTimesPanel());
