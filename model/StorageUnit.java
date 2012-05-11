@@ -3,16 +3,31 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 
+ * @author Tsvetomir Iliev
+ * 
+ */
 public class StorageUnit {
 	private Stock stock;
 	private List<Tray> trays = new ArrayList<Tray>();
+	private int slotNumber;
 
-	public StorageUnit(Stock stock) {
+	public StorageUnit(Stock stock, int slotNumber) {
 		setStock(stock);
+		this.slotNumber = slotNumber;
 	}
 
 	public Stock getStock() {
 		return stock;
+	}
+
+	public int getSlotNumber() {
+		return slotNumber;
+	}
+
+	public void setSlotNumber(int slotNumber) {
+		this.slotNumber = slotNumber;
 	}
 
 	public void setStock(Stock stock) {

@@ -11,7 +11,7 @@ public class Test {
 	public static void main(String[] args) {
 		Stock stock = new Stock("testing stock");
 		for (int i = 0; i < 5; i++) {
-			new StorageUnit(stock).getStock();
+			new StorageUnit(stock, 0).getStock();
 		}
 
 		for (StorageUnit storageUnit : stock.getStorageUnits()) {
