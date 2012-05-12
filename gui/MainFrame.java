@@ -16,13 +16,13 @@ import service.Service;
 public class MainFrame extends JFrame {
 	private JMenuItem mntmDashboard, mntmProducts, mntmPercentageOfWaste,
 			mntmAveragePickingTimes, mntmCreateTrays, mntmLogout;
-	NotificationsPanel notificationsPanel = new NotificationsPanel(this);
-	DashboardPanel dashboardPanel = new DashboardPanel(this);
-	ProductsPanel productsPanel = new ProductsPanel(this);
-	TraysCDialog traysCDialog = new TraysCDialog(this);
-	StatisticsAveragePickingTimesPanel statisticsAveragePickingTimesPanel = new StatisticsAveragePickingTimesPanel(
+	NotificationsPanel pnlNotifications = new NotificationsPanel(this);
+	DashboardPanel pnlDashboard = new DashboardPanel(this);
+	ProductsPanel pnlProducts = new ProductsPanel(this);
+	TraysCDialog dlgTraysCreate = new TraysCDialog(this);
+	StatisticsAveragePickingTimesPanel pnlStatisticsAveragePickingTimes = new StatisticsAveragePickingTimesPanel(
 			this);
-	StatisticsPercentageOfWastePanel statisticsPercentageOfWastePanel = new StatisticsPercentageOfWastePanel(
+	StatisticsPercentageOfWastePanel pnlStatisticsPercentageOfWaste = new StatisticsPercentageOfWastePanel(
 			this);
 	Controller controller = new Controller();
 
@@ -82,9 +82,9 @@ public class MainFrame extends JFrame {
 			menuBar.add(mntmLogout);
 		}
 
-		this.add(notificationsPanel, BorderLayout.NORTH);
+		this.add(pnlNotifications, BorderLayout.NORTH);
 
-		this.navigateTo(dashboardPanel);
+		this.navigateTo(pnlDashboard);
 	}
 
 	public void navigateTo(JPanel panel) {
@@ -92,23 +92,23 @@ public class MainFrame extends JFrame {
 	}
 
 	public DashboardPanel getDashboardPanel() {
-		return this.dashboardPanel;
+		return this.pnlDashboard;
 	}
 
 	public ProductsPanel getProductsPanel() {
-		return this.productsPanel;
+		return this.pnlProducts;
 	}
 
 	public TraysCDialog getTraysCDialog() {
-		return this.traysCDialog;
+		return this.dlgTraysCreate;
 	}
 
 	public StatisticsAveragePickingTimesPanel getStatisticsAveragePickingTimesPanel() {
-		return this.statisticsAveragePickingTimesPanel;
+		return this.pnlStatisticsAveragePickingTimes;
 	}
 
 	public StatisticsPercentageOfWastePanel getStatisticsPercentageOfWastePanel() {
-		return this.statisticsPercentageOfWastePanel;
+		return this.pnlStatisticsPercentageOfWaste;
 	}
 
 	private class Controller implements ActionListener {
