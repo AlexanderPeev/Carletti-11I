@@ -1,7 +1,10 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The Stock class represents a generic storage location. It could be a
@@ -17,18 +20,18 @@ public class Stock {
 	private int storageUnitsPerRow;
 	private String name;
 	private List<StorageUnit> storageUnits = new ArrayList<StorageUnit>();
-	private List<SubProcess> subProcesses = new ArrayList<SubProcess>();
+	private Set<SubProcess> subProcesses = new HashSet<SubProcess>();
 
 	public Stock() {
-		this("");
+		this("New Stock");
 	}
 
 	public Stock(String name) {
-		this(name, StockType.SEMI, 0, 0);
+		this(name, StockType.SEMI);
 	}
 
 	public Stock(String name, StockType type) {
-		this(name, type, 0, 0);
+		this(name, type, 0);
 	}
 
 	public Stock(String name, StockType type, int capacity) {
@@ -53,24 +56,40 @@ public class Stock {
 		return type;
 	}
 
+	/**
+	 * 
+	 * @param type
+	 *            If the value is null, the value StockType.SEMI is used.
+	 */
 	public void setType(StockType type) {
-		this.type = type;
+		if (type == null) this.type = StockType.SEMI;
+		else this.type = type;
 	}
 
 	public int getCapacity() {
 		return capacity;
 	}
 
+	/**
+	 * 
+	 * @param capacity
+	 *            If the value is below zero, the absolute value is used.
+	 */
 	public void setCapacity(int capacity) {
-		this.capacity = capacity;
+		this.capacity = Math.abs(capacity);
 	}
 
 	public int getMaxTraysPerStorageUnit() {
 		return maxTraysPerStorageUnit;
 	}
 
+	/**
+	 * 
+	 * @param maxTraysPerStorageUnit
+	 *            If the value is below zero, the absolute value is used.
+	 */
 	public void setMaxTraysPerStorageUnit(int maxTraysPerStorageUnit) {
-		this.maxTraysPerStorageUnit = maxTraysPerStorageUnit;
+		this.maxTraysPerStorageUnit = Math.abs(maxTraysPerStorageUnit);
 	}
 
 	public String getName() {
@@ -85,14 +104,33 @@ public class Stock {
 		return this.storageUnitsPerRow;
 	}
 
+	/**
+	 * 
+	 * @param storageUnitsPerRow
+	 *            If the value is below zero, the absolute value is used.
+	 */
 	public void setStorageUnitsPerRow(int storageUnitsPerRow) {
-		this.storageUnitsPerRow = storageUnitsPerRow;
+		this.storageUnitsPerRow = Math.abs(storageUnitsPerRow);
 	}
 
 	public List<StorageUnit> getStorageUnits() {
 		return new ArrayList<StorageUnit>(storageUnits);
 	}
 
+	public Iterator<StorageUnit> getStorageUnitsIterator() {
+		return storageUnits.iterator();
+	}
+
+	public int getStorageUnitsTotal() {
+		return storageUnits.size();
+	}
+
+	/**
+	 * The link is bidirectional and is maintained by both sides.
+	 * 
+	 * @param storageUnit
+	 *            The storage unit to add to the stock.
+	 */
 	public void addStorageUnit(StorageUnit storageUnit) {
 		if (!this.storageUnits.contains(storageUnit)) {
 			this.storageUnits.add(storageUnit);
@@ -100,6 +138,12 @@ public class Stock {
 		}
 	}
 
+	/**
+	 * The link is bidirectional and is maintained by both sides.
+	 * 
+	 * @param storageUnit
+	 *            The storage unit to remove from the stock.
+	 */
 	public void removeStorageUnit(StorageUnit storageUnit) {
 		if (this.storageUnits.contains(storageUnit)) {
 			this.storageUnits.remove(storageUnit);
@@ -107,10 +151,24 @@ public class Stock {
 		}
 	}
 
-	public List<SubProcess> getSubProcesses() {
-		return new ArrayList<SubProcess>(subProcesses);
+	public Set<SubProcess> getSubProcesses() {
+		return new HashSet<SubProcess>(subProcesses);
 	}
 
+	public Iterator<SubProcess> getSubProcessesIterator() {
+		return subProcesses.iterator();
+	}
+
+	public int getSubProcessesTotal() {
+		return subProcesses.size();
+	}
+
+	/**
+	 * The link is bidirectional and is maintained by both sides.
+	 * 
+	 * @param subProcess
+	 *            The subprocess to add to the compatibility list.
+	 */
 	public void addSubProcess(SubProcess subProcess) {
 		if (!this.subProcesses.contains(subProcess)) {
 			this.subProcesses.add(subProcess);
@@ -118,6 +176,12 @@ public class Stock {
 		}
 	}
 
+	/**
+	 * The link is bidirectional and is maintained by both sides.
+	 * 
+	 * @param subProcess
+	 *            The subprocess to remove from the compatibility list.
+	 */
 	public void removeSubProcess(SubProcess subProcess) {
 		if (this.subProcesses.contains(subProcess)) {
 			this.subProcesses.remove(subProcess);
@@ -174,6 +238,11 @@ public class Stock {
 				"Inconsistency detected! Not all trays were deposited at the destination. ");
 	}
 
+	/**
+	 * Simple toString override.
+	 * 
+	 * @return The name of the stock.
+	 */
 	@Override
 	public String toString() {
 		return getName();

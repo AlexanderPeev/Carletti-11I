@@ -44,6 +44,15 @@ public class StorageUnit {
 	public void addTray(Tray tray) {
 		if (!this.trays.contains(tray)) {
 			this.trays.add(tray);
+			// TODO Tsvetomir - make an algorithm to set
+			// the slot number (via tray.setSlotNumber)
+			// to an appropriate number, based on the
+			// existing trays and their numbers. Hint:
+			// iterate over the trays (sorted after
+			// their slot numbers) and set the number to
+			// the first found hole in the sequence of
+			// trays, and if no hole is found set it to
+			// the largest found slot number + 1.
 			tray.setStorageUnit(this);
 		}
 	}

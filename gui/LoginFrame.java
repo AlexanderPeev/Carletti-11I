@@ -17,6 +17,12 @@ import javax.swing.JTextField;
 
 import service.Service;
 
+/**
+ * A generic purpose login screen.
+ * 
+ * @author Alexander Peev
+ * 
+ */
 public class LoginFrame extends JFrame {
 	private JTextField txfUser;
 	private JPasswordField pwfPassword;

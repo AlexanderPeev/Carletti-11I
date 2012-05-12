@@ -13,6 +13,13 @@ import javax.swing.JPanel;
 import model.User;
 import service.Service;
 
+/**
+ * The main frame of the application. It is displayed only when a user is logged
+ * in.
+ * 
+ * @author Alexander Peev
+ * 
+ */
 public class MainFrame extends JFrame {
 	private JMenuItem mntmDashboard, mntmProducts, mntmPercentageOfWaste,
 			mntmAveragePickingTimes, mntmCreateTrays, mntmLogout;

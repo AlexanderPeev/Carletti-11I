@@ -80,6 +80,6 @@ public class Tray {
 	}
 
 	public State nextState(Stock stock) {
-		return null;
+		return null; // TODO Tsvetomir - look at the Pick a unit use case DSD.
 	}
 }
