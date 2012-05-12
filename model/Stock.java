@@ -13,7 +13,7 @@ import java.util.Set;
  * @author Alexander Peev
  * 
  */
-public class Stock {
+public class Stock implements Comparable<Stock> {
 	private StockType type;
 	private int capacity;
 	private int maxTraysPerStorageUnit;
@@ -246,5 +246,17 @@ public class Stock {
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	/**
+	 * Compares by name in a case-insensitive manner.
+	 * 
+	 * @param other
+	 *            must not be null.
+	 * @return the comparison result.
+	 */
+	@Override
+	public int compareTo(Stock other) {
+		return getName().compareToIgnoreCase(other.getName());
 	}
 }
