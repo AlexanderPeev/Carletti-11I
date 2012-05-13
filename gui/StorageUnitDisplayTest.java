@@ -14,7 +14,7 @@ import model.Tray;
 
 public class StorageUnitDisplayTest extends JFrame {
 	private StorageUnitDisplayPanel pnlDisplay;
-	private StorageUnit unit;
+	private static StorageUnit unit;
 	private ProductType product;
 	private SubProcess subProcess;
 
@@ -29,40 +29,42 @@ public class StorageUnitDisplayTest extends JFrame {
 			this.setSize(40, 120);
 		}
 		this.setTitle(mode + " Resizable Storage Unit Display Tester");
-		unit = new StorageUnit(new Stock("Test stock", StockType.SEMI, 30, 16,
-				5), 3);
+		if (unit == null) {
+			unit = new StorageUnit(new Stock("Test stock", StockType.SEMI, 30,
+					16, 5), 3);
+			product = new ProductType("Skumbananer");
+			subProcess = new SubProcess(0, "Core Production", 100, 200, 300);
+			product.addSubProcess(subProcess);
+			Tray tray = new Tray(unit, product, 3);
+			State state = new State(tray, new Date(
+					System.currentTimeMillis() - 80 * 60000));
+			tray.addState(state);
+			state.setSubProcess(subProcess);
+			unit.addTray(tray);
+			// if (mode != DisplayMode.FULL)
+			StorageUnitDisplayPanel.addSelectedTray(tray);
+			tray = new Tray(unit, product, 4);
+			state = new State(tray, new Date(
+					System.currentTimeMillis() - 120 * 60000));
+			tray.addState(state);
+			state.setSubProcess(subProcess);
+			unit.addTray(tray);
+			// if (mode != DisplayMode.FULL)
+			StorageUnitDisplayPanel.addSelectedTray(tray);
+			tray = new Tray(unit, product, 9);
+			state = new State(tray, new Date(
+					System.currentTimeMillis() - 220 * 60000));
+			tray.addState(state);
+			state.setSubProcess(subProcess);
+			unit.addTray(tray);
+			tray = new Tray(unit, product, 12);
+			state = new State(tray, new Date(
+					System.currentTimeMillis() - 320 * 60000));
+			tray.addState(state);
+			state.setSubProcess(subProcess);
+			unit.addTray(tray);
+		}
 		pnlDisplay = new StorageUnitDisplayPanel(unit, mode);
-		product = new ProductType("Skumbananer");
-		subProcess = new SubProcess(0, "Core Production", 100, 200, 300);
-		product.addSubProcess(subProcess);
-		Tray tray = new Tray(unit, product, 3);
-		State state = new State(tray, new Date(
-				System.currentTimeMillis() - 80 * 60000));
-		tray.addState(state);
-		state.setSubProcess(subProcess);
-		unit.addTray(tray);
-		// if (mode != DisplayMode.FULL)
-		pnlDisplay.addSelectedTray(tray);
-		tray = new Tray(unit, product, 4);
-		state = new State(tray, new Date(
-				System.currentTimeMillis() - 120 * 60000));
-		tray.addState(state);
-		state.setSubProcess(subProcess);
-		unit.addTray(tray);
-		// if (mode != DisplayMode.FULL)
-		pnlDisplay.addSelectedTray(tray);
-		tray = new Tray(unit, product, 9);
-		state = new State(tray, new Date(
-				System.currentTimeMillis() - 220 * 60000));
-		tray.addState(state);
-		state.setSubProcess(subProcess);
-		unit.addTray(tray);
-		tray = new Tray(unit, product, 12);
-		state = new State(tray, new Date(
-				System.currentTimeMillis() - 320 * 60000));
-		tray.addState(state);
-		state.setSubProcess(subProcess);
-		unit.addTray(tray);
 		this.add(pnlDisplay);
 	}
 

@@ -22,21 +22,24 @@ import model.SubProcess;
 import model.Tray;
 
 /**
- * Provides a graphical interface to a StorageUnit and its contained trays.
+ * Provides a graphical interface to a StorageUnit and its contained trays. Uses
+ * a modified version of the observer pattern.
  * 
  * @author Alexander Peev
  * 
  */
-public class StorageUnitDisplayPanel extends JPanel {
-	private Set<Tray> selectedTrays;
+public class StorageUnitDisplayPanel extends JPanel implements
+		TraySelectionChangedListener {
+	private static Set<Tray> selectedTrays = new HashSet<Tray>();
+	private static Set<TraySelectionChangedListener> traySelectionChangedListeners = new HashSet<TraySelectionChangedListener>();
 	private StorageUnit storageUnit;
 	private Controller controller = new Controller();
 	private DisplayMode displayMode;
 
 	public StorageUnitDisplayPanel(StorageUnit storageUnit, DisplayMode mode) {
+		StorageUnitDisplayPanel.addTraySelectionChangedListener(this);
 		this.storageUnit = storageUnit;
 		this.displayMode = mode;
-		this.selectedTrays = new HashSet<Tray>();
 		this.addMouseListener(controller);
 	}
 
@@ -59,31 +62,69 @@ public class StorageUnitDisplayPanel extends JPanel {
 		}
 	}
 
-	public Set<Tray> getSelectedTrays() {
-		return new HashSet<Tray>(this.selectedTrays);
+	public static Set<Tray> getSelectedTrays() {
+		return new HashSet<Tray>(StorageUnitDisplayPanel.selectedTrays);
 	}
 
-	public Iterator<Tray> getSelectedTraysIterator() {
-		return this.selectedTrays.iterator();
+	public static Iterator<Tray> getSelectedTraysIterator() {
+		return StorageUnitDisplayPanel.selectedTrays.iterator();
 	}
 
-	public int getSelectedTraysTotal() {
-		return this.selectedTrays.size();
+	public static int getSelectedTraysTotal() {
+		return StorageUnitDisplayPanel.selectedTrays.size();
 	}
 
-	public void addSelectedTray(Tray tray) {
+	public static void addSelectedTray(Tray tray) {
 		if (tray == null) return;
-		if (this.selectedTrays.add(tray)) this.repaint();
+		if (StorageUnitDisplayPanel.selectedTrays.add(tray)) StorageUnitDisplayPanel
+				.triggerTraySelectionChanged();
 	}
 
-	public void removeSelectedTray(Tray tray) {
+	public static void removeSelectedTray(Tray tray) {
 		if (tray == null) return;
-		if (this.selectedTrays.remove(tray)) this.repaint();
+		if (StorageUnitDisplayPanel.selectedTrays.remove(tray)) StorageUnitDisplayPanel
+				.triggerTraySelectionChanged();
 	}
 
-	public void clearSelection() {
-		this.selectedTrays.clear();
-		this.repaint();
+	public static boolean hasSelectedTray(Tray tray) {
+		if (tray == null) return false;
+		return StorageUnitDisplayPanel.selectedTrays.contains(tray);
+	}
+
+	public static void clearSelection() {
+		StorageUnitDisplayPanel.selectedTrays.clear();
+		StorageUnitDisplayPanel.triggerTraySelectionChanged();
+	}
+
+	public static void triggerTraySelectionChanged() {
+		for (TraySelectionChangedListener listener : StorageUnitDisplayPanel.traySelectionChangedListeners) {
+			listener.onTraySelectionChanged();
+		}
+	}
+
+	public static Set<TraySelectionChangedListener> getTraySelectionChangedListeners() {
+		return new HashSet<TraySelectionChangedListener>(
+				StorageUnitDisplayPanel.traySelectionChangedListeners);
+	}
+
+	public static Iterator<TraySelectionChangedListener> getTraySelectionChangedListenersIterator() {
+		return StorageUnitDisplayPanel.traySelectionChangedListeners.iterator();
+	}
+
+	public static int getTraySelectionChangedListenersTotal() {
+		return StorageUnitDisplayPanel.traySelectionChangedListeners.size();
+	}
+
+	public static void addTraySelectionChangedListener(
+			TraySelectionChangedListener listener) {
+		if (listener != null) StorageUnitDisplayPanel.traySelectionChangedListeners
+				.add(listener);
+	}
+
+	public static void removeTraySelectionChangedListener(
+			TraySelectionChangedListener listener) {
+		if (listener != null) StorageUnitDisplayPanel.traySelectionChangedListeners
+				.remove(listener);
 	}
 
 	@Override
@@ -230,14 +271,17 @@ public class StorageUnitDisplayPanel extends JPanel {
 
 				if (traysMap.containsKey(i)) {
 					Tray tray = traysMap.get(i);
-					if (StorageUnitDisplayPanel.this.selectedTrays
-							.contains(tray)) StorageUnitDisplayPanel.this.selectedTrays
-							.remove(tray);
-					else StorageUnitDisplayPanel.this.selectedTrays.add(tray);
-					StorageUnitDisplayPanel.this.repaint();
+					if (StorageUnitDisplayPanel.hasSelectedTray(tray)) StorageUnitDisplayPanel
+							.removeSelectedTray(tray);
+					else StorageUnitDisplayPanel.addSelectedTray(tray);
 				}
 
 			}
 		}
+	}
+
+	@Override
+	public void onTraySelectionChanged() {
+		this.repaint();
 	}
 }
