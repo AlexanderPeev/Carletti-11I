@@ -1,12 +1,13 @@
+/**
+ * @author Ricardas Risys
+ */
+
 package model;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author Ricardas Risys
- */
-
+// blue - too early, green - between min-opt, yellow - opt-max, red - waste
 public class User {
 	private String username;
 	private String password;
@@ -48,7 +49,6 @@ public class User {
 
 	public void setGroup(GroupType group) {
 		this.group = group;
-		applyPermissions();
 	}
 
 	/**
@@ -72,13 +72,15 @@ public class User {
 			permissions.put("Statistics", true);
 			permissions.put("Create Trays", true);
 			permissions.put("Logout", true);
+			permissions.put("Create Stock", true);
+			permissions.put("Update Stock", true);
+			permissions.put("Delete Stock", true);
 		}
 		else if (this.group.equals(GroupType.WORKER)) {
 			permissions.put("Dashboard", true);
-			permissions.put("Products", false);
-			permissions.put("Statistics", false);
-			permissions.put("Create Trays", true);
+			permissions.put("Products", true);
 			permissions.put("Logout", true);
+			permissions.put("Create Stock", false);
 		}
 	}
 }

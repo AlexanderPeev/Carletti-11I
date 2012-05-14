@@ -32,13 +32,14 @@ public class MainFrame extends JFrame {
 	StatisticsPercentageOfWastePanel pnlStatisticsPercentageOfWaste = new StatisticsPercentageOfWastePanel(
 			this);
 	Controller controller = new Controller();
+	private JPanel current = null;
 
 	public MainFrame() {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		User user = Service.getCurrentUser();
 		this.setTitle("Carletti Production Manager - " + user.getUsername()
 				+ " (" + user.getGroup() + ")");
-		this.setResizable(false);
+		this.setResizable(true);
 		this.setSize(600, 500);
 		this.setLocationRelativeTo(this.getRootPane());
 
@@ -95,7 +96,10 @@ public class MainFrame extends JFrame {
 	}
 
 	public void navigateTo(JPanel panel) {
+		if (current != null) this.remove(current);
 		this.add(panel, BorderLayout.CENTER);
+		current = panel;
+		this.repaint();
 	}
 
 	public DashboardPanel getDashboardPanel() {

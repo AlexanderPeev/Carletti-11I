@@ -34,6 +34,7 @@ public class Service {
 			if (username.equals(user.getUsername())) {
 				if (password.equals(user.getPassword())) {
 					Service.currentUser = user;
+					user.applyPermissions();
 					return;
 				}
 			}

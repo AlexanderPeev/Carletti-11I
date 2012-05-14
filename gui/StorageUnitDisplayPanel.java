@@ -29,12 +29,13 @@ import model.Tray;
  * 
  */
 public class StorageUnitDisplayPanel extends JPanel implements
-		TraySelectionChangedListener {
+		TraySelectionChangedListener, ClickProvider {
 	private static Set<Tray> selectedTrays = new HashSet<Tray>();
 	private static Set<TraySelectionChangedListener> traySelectionChangedListeners = new HashSet<TraySelectionChangedListener>();
 	private StorageUnit storageUnit;
 	private Controller controller = new Controller();
 	private DisplayMode displayMode;
+	private Set<ClickListener> clickListeners = new HashSet<ClickListener>();
 
 	public StorageUnitDisplayPanel(StorageUnit storageUnit, DisplayMode mode) {
 		StorageUnitDisplayPanel.addTraySelectionChangedListener(this);
@@ -74,8 +75,35 @@ public class StorageUnitDisplayPanel extends JPanel implements
 		return StorageUnitDisplayPanel.selectedTrays.size();
 	}
 
+	public static boolean isSelectable(Tray tray) {
+		Set<ProductType> productTypes = new HashSet<ProductType>();
+		Set<SubProcess> subProcesses = new HashSet<SubProcess>();
+		for (Tray selected : StorageUnitDisplayPanel.selectedTrays) {
+			ProductType productType = selected.getProductType();
+			if (productType != null) productTypes.add(productType);
+			List<State> states = selected.getStates();
+			if (states == null || states.size() < 1) continue;
+			State state = states.get(states.size() - 1);
+			SubProcess subProcess = state.getSubProcess();
+			if (subProcess != null) subProcesses.add(subProcess);
+		}
+		List<State> states = tray.getStates();
+		State state = null;
+		if (states != null && states.size() > 0) {
+			state = states.get(states.size() - 1);
+		}
+		SubProcess subProcess = null;
+		if (state != null) subProcess = state.getSubProcess();
+		if (productTypes.size() > 0
+				&& !productTypes.contains(tray.getProductType())) return false;
+		if (subProcesses.size() > 0 && !subProcesses.contains(subProcess)) return false;
+		return true;
+	}
+
 	public static void addSelectedTray(Tray tray) {
-		if (tray == null) return;
+		if (tray == null
+				|| StorageUnitDisplayPanel.selectedTrays.contains(tray)) return;
+		if (!StorageUnitDisplayPanel.isSelectable(tray)) return;
 		if (StorageUnitDisplayPanel.selectedTrays.add(tray)) StorageUnitDisplayPanel
 				.triggerTraySelectionChanged();
 	}
@@ -100,6 +128,10 @@ public class StorageUnitDisplayPanel extends JPanel implements
 		for (TraySelectionChangedListener listener : StorageUnitDisplayPanel.traySelectionChangedListeners) {
 			listener.onTraySelectionChanged();
 		}
+	}
+
+	public void detatch() {
+		StorageUnitDisplayPanel.removeTraySelectionChangedListener(this);
 	}
 
 	public static Set<TraySelectionChangedListener> getTraySelectionChangedListeners() {
@@ -132,8 +164,17 @@ public class StorageUnitDisplayPanel extends JPanel implements
 		super.paintComponent(g);
 		if (this.storageUnit != null) {
 			int width = this.getWidth(), height = this.getHeight(), max = storageUnit
-					.getStock().getMaxTraysPerStorageUnit();
-			g.setFont(new Font("Arial", Font.PLAIN, (int) (height / max * .6)));
+					.getStock().getMaxTraysPerStorageUnit(), unitFieldHeight = height
+					/ max, unitHeight = (int) Math.round(unitFieldHeight * .8), unitWidth = (int) Math
+					.round(width * .95), unitLeftOffset = (int) Math
+					.round(width * .025), unitTopOffset = (unitFieldHeight / 10), textTopOffset = 0, textLeftOffset = (int) Math
+					.round(unitLeftOffset + unitWidth * .05), textHeight = (int) Math
+					.round(unitHeight * .9), textWidth = (int) Math
+					.round(unitWidth * .9), textBaselineOffset = (int) Math
+					.round(textHeight * .8);
+			g.setFont(new Font("Arial", Font.PLAIN,
+					(int) (unitFieldHeight * .6)));
+			Color textColor = Color.BLACK, fillColor = Color.MAGENTA;
 			List<Tray> trays = storageUnit.getTrays();
 			HashMap<Integer, Tray> traysMap = new HashMap<Integer, Tray>();
 			for (Tray tray : trays) {
@@ -149,8 +190,10 @@ public class StorageUnitDisplayPanel extends JPanel implements
 					if (states.size() > 0) state = states
 							.get(states.size() - 1);
 					String text = "";
+					boolean displayTextColor = false;
 					if (state == null) {
-						g.setColor(Color.CYAN);
+						fillColor = Color.CYAN;
+						textColor = Color.BLACK;
 						text = j + ": Unknown state - " + productType.getName();
 					}
 					else {
@@ -163,53 +206,73 @@ public class StorageUnitDisplayPanel extends JPanel implements
 						int difference = (int) (Math.abs(end
 								- state.getStartTime().getTime()) / 60000);
 						if (subProcess.getMinTime() > difference) {
-							g.setColor(Color.BLUE);
+							fillColor = new Color(0x5d74ff);
 						}
 						else if (subProcess.getIdealTime() > difference) {
-							g.setColor(Color.GREEN);
+							fillColor = new Color(0x3bbb25);
 						}
 						else if (subProcess.getMaxTime() > difference) {
-							g.setColor(Color.YELLOW);
+							fillColor = new Color(0xe7f730);
 						}
 						else {
-							g.setColor(Color.RED);
+							fillColor = new Color(0xff3636);
 						}
+						if (StorageUnitDisplayPanel.getSelectedTraysTotal() > 0
+								&& !isSelectable(tray)) {
+							textColor = fillColor;
+							if (this.displayMode == DisplayMode.FULL) fillColor = Color.BLACK;
+							else fillColor = Color.GRAY;
+							displayTextColor = true;
+						}
+						else textColor = Color.BLACK;
 					}
-					g.fillRoundRect((int) (width * .05), (i * height / max)
-							+ (height / max / 10), (int) (width * .9),
-							(int) (height / max * .8),
-							Math.min(width / 10, height / max / 3), height
-									/ max / 3);
+					g.setColor(fillColor);
+					g.fillRoundRect((int) (unitLeftOffset),
+							(i * unitFieldHeight) + unitTopOffset, unitWidth,
+							unitHeight,
+							Math.min(width / 10, unitFieldHeight / 3),
+							unitFieldHeight / 3);
 					if (selectedTrays.contains(tray)) {
 						g.setColor(Color.DARK_GRAY);
-						g.drawRoundRect((int) (width * .05), (i * height / max)
-								+ (height / max / 10), (int) (width * .9),
-								(int) (height / max * .8),
-								Math.min(width / 10, height / max / 3), height
-										/ max / 3);
-						g.drawRoundRect((int) (width * .05) - 1,
-								(i * height / max) + (height / max / 10) - 1,
-								(int) (width * .9) + 2,
-								(int) (height / max * .8) + 2,
-								Math.min(width / 10, height / max / 3) + 1,
-								height / max / 3 + 1);
+						g.drawRoundRect(unitLeftOffset, (i * unitFieldHeight)
+								+ unitTopOffset, unitWidth, unitHeight,
+								Math.min(width / 10, unitFieldHeight / 3),
+								unitFieldHeight / 3);
+						g.drawRoundRect(unitLeftOffset - 1,
+								(i * unitFieldHeight) + unitTopOffset - 1,
+								unitWidth + 2, unitHeight + 2,
+								Math.min(width / 10, unitFieldHeight / 3) + 1,
+								unitFieldHeight / 3 + 1);
 					}
 					if (this.displayMode == DisplayMode.FULL) {
+						g.setColor(textColor);
 						g.setFont(StorageUnitDisplayPanel.getAppropriateFont(
-								text, (int) (width * .75),
-								(int) (height / max * .6)));
+								text, textWidth, textHeight));
+						g.drawString(text, textLeftOffset,
+								(i * unitFieldHeight) + unitTopOffset
+										+ textTopOffset + textBaselineOffset);
+					}
+					else if (displayTextColor) {
+						g.setColor(textColor);
+						g.fillRoundRect(unitLeftOffset, (i * unitFieldHeight)
+								+ unitTopOffset, textLeftOffset,
+								unitHeight - 1,
+								Math.min(width / 10, unitFieldHeight / 3),
+								unitFieldHeight / 3);
 						g.setColor(Color.BLACK);
-						g.drawString(text, width / 8, (i * height / max)
-								+ (int) (height / max * .7));
+						g.drawRoundRect(unitLeftOffset, (i * unitFieldHeight)
+								+ unitTopOffset, textLeftOffset,
+								unitHeight - 1,
+								Math.min(width / 10, unitFieldHeight / 3),
+								unitFieldHeight / 3);
 					}
 				}
 				else {
 					g.setColor(Color.WHITE);
-					g.fillRoundRect((int) (width * .05), (i * height / max)
-							+ (height / max / 10), (int) (width * .9),
-							(int) (height / max * .8),
-							Math.min(width / 10, height / max / 3), height
-									/ max / 3);
+					g.fillRoundRect(unitLeftOffset, (i * unitFieldHeight)
+							+ unitTopOffset, unitWidth, unitHeight + 1,
+							Math.min(width / 10, unitFieldHeight / 3),
+							unitFieldHeight / 3);
 				}
 			}
 		}
@@ -256,7 +319,10 @@ public class StorageUnitDisplayPanel extends JPanel implements
 
 		@Override
 		public void mouseReleased(MouseEvent arg0) {
-			if (StorageUnitDisplayPanel.this.displayMode != DisplayMode.FULL) return;
+			if (StorageUnitDisplayPanel.this.displayMode != DisplayMode.FULL) {
+				StorageUnitDisplayPanel.this.fireClick();
+				return;
+			}
 			int y = arg0.getY();
 			if (StorageUnitDisplayPanel.this.storageUnit != null) {
 				int height = StorageUnitDisplayPanel.this.getHeight(), max = storageUnit
@@ -266,11 +332,11 @@ public class StorageUnitDisplayPanel extends JPanel implements
 				for (Tray tray : trays) {
 					traysMap.put(tray.getSlotNumber(), tray);
 				}
-				int j = y * max / height;
+				int j = (int) ((double) y / (height / max));
 				int i = max - 1 - j;
-
 				if (traysMap.containsKey(i)) {
 					Tray tray = traysMap.get(i);
+					System.out.println(tray);
 					if (StorageUnitDisplayPanel.hasSelectedTray(tray)) StorageUnitDisplayPanel
 							.removeSelectedTray(tray);
 					else StorageUnitDisplayPanel.addSelectedTray(tray);
@@ -283,5 +349,37 @@ public class StorageUnitDisplayPanel extends JPanel implements
 	@Override
 	public void onTraySelectionChanged() {
 		this.repaint();
+	}
+
+	@Override
+	public void addClickListener(ClickListener listener) {
+		if (listener != null) this.clickListeners.add(listener);
+	}
+
+	@Override
+	public void removeClickListener(ClickListener listener) {
+		if (listener != null) this.clickListeners.remove(listener);
+	}
+
+	@Override
+	public Set<ClickListener> getClickListeners() {
+		return new HashSet<ClickListener>(this.clickListeners);
+	}
+
+	@Override
+	public Iterator<ClickListener> getClickListenersIterator() {
+		return this.clickListeners.iterator();
+	}
+
+	@Override
+	public int getClickListenersTotal() {
+		return this.clickListeners.size();
+	}
+
+	@Override
+	public void fireClick() {
+		for (ClickListener listener : this.clickListeners) {
+			if (listener != null) listener.onClick(this);
+		}
 	}
 }
