@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,6 +45,10 @@ public class ProductType {
 	public List<SubProcess> getSubProcesses() {
 		return new ArrayList<SubProcess>(subProcesses);
 	}
+	
+	public void reSortSubProcesses(){
+		Collections.sort(this.subProcesses);
+	}
 
 	/**
 	 * 
@@ -52,6 +57,7 @@ public class ProductType {
 	public void addSubProcess(SubProcess subProcess) {
 		if (!this.subProcesses.contains(subProcess)) {
 			this.subProcesses.add(subProcess);
+			reSortSubProcesses();
 		}
 	}
 
@@ -95,5 +101,13 @@ public class ProductType {
 			this.trays.remove(tray);
 			tray.setProductType(null);
 		}
+	}
+
+	public SubProcess getNextSubProcess(State state) {
+		if (state == null) return null;
+		SubProcess sp = state.getSubProcess();
+		if (sp == null || !this.subProcesses.contains(sp)
+				|| this.subProcesses.indexOf(sp) < this.subProcesses.size() - 1) return null;
+		return this.subProcesses.get(this.subProcesses.indexOf(sp) + 1);
 	}
 }

@@ -4,8 +4,6 @@
 
 package gui;
 
-import gui.SquareGraphic.StockState;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -13,7 +11,7 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Random;
+import java.util.Set;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -22,7 +20,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import model.Stock;
-import model.StockType;
 import model.User;
 import service.Service;
 
@@ -34,6 +31,7 @@ public class DashboardPanel extends JPanel {
 	private JScrollPane scpStockInfo;
 	private SelectStockListener selectStockLisneter = new SelectStockListener();
 	private SquareGraphic selectedSquare = null;
+	private StockOverviewPanel stockOverviewPanel = new StockOverviewPanel(this);
 
 	public DashboardPanel(MainFrame owner) {
 		User user = Service.getCurrentUser();
@@ -53,27 +51,12 @@ public class DashboardPanel extends JPanel {
 				BoxLayout.Y_AXIS));
 
 		SquareGraphic sq;
-		Random ran = new Random();
-		Stock stock;
-		for (int i = 0; i < 21; i++) {
-			stock = new Stock("Warehouse Nr. " + i, StockType.MACHINE,
-					ran.nextInt(100) + 5, 12);
+		Set<Stock> stocks = Service.getAllStocks();
+		for (Stock stock : stocks) {
 			sq = new SquareGraphic();
 			sq.addMouseListener(selectStockLisneter);
 			sq.setPreferredSize(new Dimension(85, 85));
 			sq.setStock(stock);
-			if (i % 1 == 1) {
-				sq.setState(StockState.EARLY);
-			}
-			if (i % 2 == 1) {
-				sq.setState(StockState.MINOPT);
-			}
-			if (i % 3 == 1) {
-				sq.setState(StockState.OPTMAX);
-			}
-			if (i % 4 == 1) {
-				sq.setState(StockState.WASTE);
-			}
 			pnlDashboardCenter.add(sq);
 		}
 
@@ -121,7 +104,9 @@ public class DashboardPanel extends JPanel {
 		@Override
 		public void mouseClicked(MouseEvent arg0) {
 			if (arg0.getClickCount() == 2) {
-				// go in
+				if (selectedSquare != null) stockOverviewPanel
+						.setStock(selectedSquare.getStock());
+				getOwner().navigateTo(stockOverviewPanel);
 			}
 		}
 
@@ -163,7 +148,8 @@ public class DashboardPanel extends JPanel {
 
 				btnUpdateStock.setEnabled(true);
 				btnDeleteStock.setEnabled(true);
-			} else {
+			}
+			else {
 				output = "No Stock selected";
 				btnUpdateStock.setEnabled(false);
 				btnDeleteStock.setEnabled(false);

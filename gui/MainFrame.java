@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -41,6 +42,7 @@ public class MainFrame extends JFrame {
 				+ " (" + user.getGroup() + ")");
 		this.setResizable(true);
 		this.setSize(600, 500);
+		this.setMinimumSize(new Dimension(500, 450));
 		this.setLocationRelativeTo(this.getRootPane());
 
 		JMenuBar menuBar = new JMenuBar();
@@ -99,7 +101,36 @@ public class MainFrame extends JFrame {
 		if (current != null) this.remove(current);
 		this.add(panel, BorderLayout.CENTER);
 		current = panel;
+		this.indicateSelection(panel);
 		this.repaint();
+		this.validate();
+	}
+
+	private void indicateSelection(JPanel panel) {
+		if (panel == this.pnlDashboard) {
+			this.mntmDashboard.setEnabled(false);
+		}
+		else {
+			this.mntmDashboard.setEnabled(true);
+		}
+		if (panel == this.pnlProducts) {
+			this.mntmProducts.setEnabled(false);
+		}
+		else {
+			this.mntmProducts.setEnabled(true);
+		}
+		if (panel == this.pnlStatisticsAveragePickingTimes) {
+			this.mntmAveragePickingTimes.setEnabled(false);
+		}
+		else {
+			this.mntmAveragePickingTimes.setEnabled(true);
+		}
+		if (panel == this.pnlStatisticsPercentageOfWaste) {
+			this.mntmPercentageOfWaste.setEnabled(false);
+		}
+		else {
+			this.mntmPercentageOfWaste.setEnabled(true);
+		}
 	}
 
 	public DashboardPanel getDashboardPanel() {

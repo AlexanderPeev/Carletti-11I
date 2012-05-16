@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 
 import model.ProductType;
 import model.State;
+import model.StockState;
 import model.StorageUnit;
 import model.SubProcess;
 import model.Tray;
@@ -79,19 +80,14 @@ public class StorageUnitDisplayPanel extends JPanel implements
 		Set<ProductType> productTypes = new HashSet<ProductType>();
 		Set<SubProcess> subProcesses = new HashSet<SubProcess>();
 		for (Tray selected : StorageUnitDisplayPanel.selectedTrays) {
+			if (productTypes.size() > 0 && subProcesses.size() > 0) break;
 			ProductType productType = selected.getProductType();
 			if (productType != null) productTypes.add(productType);
-			List<State> states = selected.getStates();
-			if (states == null || states.size() < 1) continue;
-			State state = states.get(states.size() - 1);
+			State state = selected.getCurrentState();
 			SubProcess subProcess = state.getSubProcess();
 			if (subProcess != null) subProcesses.add(subProcess);
 		}
-		List<State> states = tray.getStates();
-		State state = null;
-		if (states != null && states.size() > 0) {
-			state = states.get(states.size() - 1);
-		}
+		State state = tray.getCurrentState();
 		SubProcess subProcess = null;
 		if (state != null) subProcess = state.getSubProcess();
 		if (productTypes.size() > 0
@@ -185,10 +181,7 @@ public class StorageUnitDisplayPanel extends JPanel implements
 				if (traysMap.containsKey(j)) {
 					Tray tray = traysMap.get(j);
 					ProductType productType = tray.getProductType();
-					List<State> states = tray.getStates();
-					State state = null;
-					if (states.size() > 0) state = states
-							.get(states.size() - 1);
+					State state = tray.getCurrentState();
 					String text = "";
 					boolean displayTextColor = false;
 					if (state == null) {
@@ -206,16 +199,18 @@ public class StorageUnitDisplayPanel extends JPanel implements
 						int difference = (int) (Math.abs(end
 								- state.getStartTime().getTime()) / 60000);
 						if (subProcess.getMinTime() > difference) {
-							fillColor = new Color(0x5d74ff);
+							fillColor = StockState.getColor(StockState.EARLY);
 						}
 						else if (subProcess.getIdealTime() > difference) {
-							fillColor = new Color(0x3bbb25);
+							fillColor = StockState
+									.getColor(StockState.MINIMUM_OPTIMAL);
 						}
 						else if (subProcess.getMaxTime() > difference) {
-							fillColor = new Color(0xe7f730);
+							fillColor = StockState
+									.getColor(StockState.OPTIMAL_MAXIMUM);
 						}
 						else {
-							fillColor = new Color(0xff3636);
+							fillColor = StockState.getColor(StockState.WASTE);
 						}
 						if (StorageUnitDisplayPanel.getSelectedTraysTotal() > 0
 								&& !isSelectable(tray)) {
@@ -233,7 +228,9 @@ public class StorageUnitDisplayPanel extends JPanel implements
 							Math.min(width / 10, unitFieldHeight / 3),
 							unitFieldHeight / 3);
 					if (selectedTrays.contains(tray)) {
-						g.setColor(Color.DARK_GRAY);
+						if (this.displayMode == DisplayMode.COMPACT) g
+								.setColor(Color.CYAN);
+						else g.setColor(Color.BLACK);
 						g.drawRoundRect(unitLeftOffset, (i * unitFieldHeight)
 								+ unitTopOffset, unitWidth, unitHeight,
 								Math.min(width / 10, unitFieldHeight / 3),
@@ -270,7 +267,7 @@ public class StorageUnitDisplayPanel extends JPanel implements
 				else {
 					g.setColor(Color.WHITE);
 					g.fillRoundRect(unitLeftOffset, (i * unitFieldHeight)
-							+ unitTopOffset, unitWidth, unitHeight + 1,
+							+ unitTopOffset, unitWidth, unitHeight,
 							Math.min(width / 10, unitFieldHeight / 3),
 							unitFieldHeight / 3);
 				}
@@ -336,7 +333,6 @@ public class StorageUnitDisplayPanel extends JPanel implements
 				int i = max - 1 - j;
 				if (traysMap.containsKey(i)) {
 					Tray tray = traysMap.get(i);
-					System.out.println(tray);
 					if (StorageUnitDisplayPanel.hasSelectedTray(tray)) StorageUnitDisplayPanel
 							.removeSelectedTray(tray);
 					else StorageUnitDisplayPanel.addSelectedTray(tray);

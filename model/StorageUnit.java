@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -11,23 +12,23 @@ import java.util.List;
 public class StorageUnit {
 	private Stock stock;
 	private List<Tray> trays = new ArrayList<Tray>();
-	private int slotNumber;
+	private int order;
 
-	public StorageUnit(Stock stock, int slotNumber) {
+	public StorageUnit(Stock stock, int order) {
 		setStock(stock);
-		this.slotNumber = slotNumber;
+		this.order = order;
 	}
 
 	public Stock getStock() {
 		return stock;
 	}
 
-	public int getSlotNumber() {
-		return slotNumber;
+	public int getOrder() {
+		return order;
 	}
 
-	public void setSlotNumber(int slotNumber) {
-		this.slotNumber = slotNumber;
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 	public void setStock(Stock stock) {
@@ -43,18 +44,34 @@ public class StorageUnit {
 
 	public void addTray(Tray tray) {
 		if (!this.trays.contains(tray)) {
+			this.setSlotNumber(tray);
 			this.trays.add(tray);
-			// TODO Tsvetomir - make an algorithm to set
-			// the slot number (via tray.setSlotNumber)
-			// to an appropriate number, based on the
-			// existing trays and their numbers. Hint:
-			// iterate over the trays (sorted after
-			// their slot numbers) and set the number to
-			// the first found hole in the sequence of
-			// trays, and if no hole is found set it to
-			// the largest found slot number + 1.
 			tray.setStorageUnit(this);
 		}
+	}
+
+	// In the method setSlotnumber we put slotNumber to -1 so later to be able
+	// to
+	// check for any holes in the tray,we declare a list as well where later
+	// we put the numbers in it.With collections.sort we sort the numbers from
+	// lowest to highest
+	// After that we go through all num and check for holes.
+
+	public void setSlotNumber(Tray tray) {
+		int slotNumber = -1;
+		List<Integer> numbers = new ArrayList<Integer>();
+		for (Tray t : this.trays) {
+			numbers.add(t.getSlotNumber());
+		}
+		Collections.sort(numbers);
+		for (Integer num : numbers) {
+			if (num > slotNumber + 1) {
+				tray.setSlotNumber(slotNumber + 1);
+				return;
+			}
+			slotNumber = num;
+		}
+		tray.setSlotNumber(slotNumber + 1);
 	}
 
 	public void removeTray(Tray tray) {

@@ -84,6 +84,7 @@ public class StockOverviewPanel extends JPanel implements ClickListener,
 
 		pnlStorageUnits = new JPanel();
 		pnlStorageUnits.setLayout(new GridLayout(1, 0, 0, 0));
+		pnlStorageUnits.setBackground(Color.BLACK);
 
 		JScrollPane scpMain = new JScrollPane(pnlStorageUnits);
 		add(scpMain, BorderLayout.CENTER);
@@ -97,7 +98,6 @@ public class StockOverviewPanel extends JPanel implements ClickListener,
 		this.pnlStorageUnits.removeAll();
 		if (this.stock != null) {
 			int columns = this.stock.getStorageUnitsPerRow();
-			System.out.println(columns);
 			this.pnlStorageUnits.setLayout(new GridLayout(0, columns, 5, 5));
 			StorageUnitDisplayPanel.clearSelection();
 			for (StorageUnitDisplayPanel display : this.compactDisplays) {
@@ -105,12 +105,15 @@ public class StockOverviewPanel extends JPanel implements ClickListener,
 				display.removeClickListener(this);
 			}
 			this.compactDisplays.clear();
+			Dimension minSize = new Dimension(120, 120);
 			for (StorageUnit storageUnit : this.stock.getStorageUnits()) {
 				StorageUnitDisplayPanel display = new StorageUnitDisplayPanel(
 						storageUnit, DisplayMode.COMPACT);
 				this.compactDisplays.add(display);
 				this.pnlStorageUnits.add(display);
+				display.setPreferredSize(minSize);
 				display.addClickListener(this);
+				display.setBackground(Color.BLACK);
 			}
 		}
 	}
@@ -140,8 +143,8 @@ public class StockOverviewPanel extends JPanel implements ClickListener,
 			this.selectedCompactDisplay = display;
 			this.zoomDisplay = new StorageUnitDisplayPanel(unit,
 					DisplayMode.FULL);
-			display.setBorder(BorderFactory.createLineBorder(Color.GRAY, 3,
-					true));
+			display.setBorder(BorderFactory.createMatteBorder(1, 1, 4, 1,
+					Color.LIGHT_GRAY));
 			pnlZoom.add(this.zoomDisplay, BorderLayout.CENTER);
 
 			this.validate();

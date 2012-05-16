@@ -23,12 +23,12 @@ public class Tray {
 	}
 
 	public Tray(StorageUnit storageUnit, ProductType productType, int slotNumber) {
+		this.slotNumber = slotNumber;
 		setStorageUnit(storageUnit);
 		setProductType(productType);
 
 		State state = new State(this);
 		addState(state);
-		this.slotNumber = slotNumber;
 	}
 
 	public StorageUnit getStorageUnit() {
@@ -81,5 +81,9 @@ public class Tray {
 
 	public State nextState(Stock stock) {
 		return null; // TODO Tsvetomir - look at the Pick a unit use case DSD.
+	}
+
+	public State getCurrentState() {
+		return this.states.get(this.states.size() - 1);
 	}
 }

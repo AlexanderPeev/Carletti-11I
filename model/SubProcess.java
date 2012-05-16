@@ -4,16 +4,16 @@
 
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-public class SubProcess {
+public class SubProcess implements Comparable<SubProcess> {
 	private int minTime;
 	private int idealTime;
 	private int maxTime;
 	private String name;
 	private int order;
-	private List<Stock> stocks = new ArrayList<Stock>();
+	private Set<Stock> stocks = new HashSet<Stock>();
 
 	public SubProcess() {
 		this(0, "", 0, 0, 0);
@@ -93,8 +93,8 @@ public class SubProcess {
 		this.order = order;
 	}
 
-	public List<Stock> getStocks() {
-		return new ArrayList<Stock>(stocks);
+	public Set<Stock> getStocks() {
+		return new HashSet<Stock>(stocks);
 	}
 
 	/**
@@ -119,5 +119,10 @@ public class SubProcess {
 			this.stocks.remove(stock);
 			stock.removeSubProcess(this);
 		}
+	}
+
+	@Override
+	public int compareTo(SubProcess arg0) {
+		return this.order - arg0.getOrder();
 	}
 }
