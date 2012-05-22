@@ -48,45 +48,46 @@ public class MainFrame extends JFrame {
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
+		mntmDashboard = new JMenuItem("Dashboard");
+		mntmProducts = new JMenuItem("Products");
+		JMenu mnStatistics = new JMenu("Statistics");
+		mntmPercentageOfWaste = new JMenuItem("Percentage of Waste");
+		mntmCreateTrays = new JMenuItem("Create Trays");
+		mntmAveragePickingTimes = new JMenuItem("Average Picking Times");
+		mntmLogout = new JMenuItem("Logout");
+
 		if (user.canAccess("Dashboard")) {
-			mntmDashboard = new JMenuItem("Dashboard");
 			mntmDashboard.setMnemonic('D');
 			mntmDashboard.addActionListener(controller);
 			menuBar.add(mntmDashboard);
 		}
 
 		if (user.canAccess("Products")) {
-			mntmProducts = new JMenuItem("Products");
 			mntmProducts.setMnemonic('P');
 			mntmProducts.addActionListener(controller);
 			menuBar.add(mntmProducts);
 		}
 
 		if (user.canAccess("Statistics")) {
-			JMenu mnStatistics = new JMenu("Statistics");
 			mnStatistics.setMnemonic('S');
-			menuBar.add(mnStatistics);
+			// menuBar.add(mnStatistics);
 
-			mntmPercentageOfWaste = new JMenuItem("Percentage of Waste");
 			mntmPercentageOfWaste.setMnemonic('W');
 			mntmPercentageOfWaste.addActionListener(controller);
-			mnStatistics.add(mntmPercentageOfWaste);
+			// mnStatistics.add(mntmPercentageOfWaste);
 
-			mntmAveragePickingTimes = new JMenuItem("Average Picking Times");
 			mntmAveragePickingTimes.setMnemonic('A');
 			mntmAveragePickingTimes.addActionListener(controller);
-			mnStatistics.add(mntmAveragePickingTimes);
+			// mnStatistics.add(mntmAveragePickingTimes);
 		}
 
 		if (user.canAccess("Create Trays")) {
-			mntmCreateTrays = new JMenuItem("Create Trays");
 			mntmCreateTrays.setMnemonic('T');
 			mntmCreateTrays.addActionListener(controller);
 			menuBar.add(mntmCreateTrays);
 		}
 
 		if (user.canAccess("Logout")) {
-			mntmLogout = new JMenuItem("Logout");
 			mntmLogout.setMnemonic('L');
 			mntmLogout.addActionListener(controller);
 			menuBar.add(mntmLogout);
@@ -162,8 +163,10 @@ public class MainFrame extends JFrame {
 					.navigateTo(MainFrame.this.getDashboardPanel());
 			else if (src == MainFrame.this.mntmProducts) MainFrame.this
 					.navigateTo(MainFrame.this.getProductsPanel());
-			else if (src == MainFrame.this.mntmCreateTrays) MainFrame.this
-					.getTraysCDialog().setVisible(true);
+			else if (src == MainFrame.this.mntmCreateTrays) {
+				MainFrame.this.getTraysCDialog().refillList();
+				MainFrame.this.getTraysCDialog().setVisible(true);
+			}
 			else if (src == MainFrame.this.mntmAveragePickingTimes) MainFrame.this
 					.navigateTo(MainFrame.this
 							.getStatisticsAveragePickingTimesPanel());

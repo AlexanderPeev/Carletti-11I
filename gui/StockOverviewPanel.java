@@ -8,17 +8,29 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import model.InconsistencyException;
+import model.OutOfStockSpaceException;
+import model.ProductType;
+import model.State;
 import model.Stock;
 import model.StorageUnit;
 import model.Tray;
+import service.PickTooEarlyException;
+import service.PickTooLateException;
+import service.Service;
+import service.StockNotCompatibleException;
 
 /**
  * A panel for displaying the contents of a Stock object. It provides a visual
@@ -28,19 +40,21 @@ import model.Tray;
  * 
  */
 public class StockOverviewPanel extends JPanel implements ClickListener,
-		TraySelectionChangedListener {
+		TraySelectionChangedListener, UpdateObserver {
 
 	private DashboardPanel owner = null;
 	private JPanel pnlStorageUnits, pnlZoom;
 	private JButton btnClearSelection, btnPickSelected, btnRemoveSelected,
-			btnSelectAll;
+			btnSelectAll, btnSelectUnit;
+	private JLabel lblSelection;
 	private Stock stock;
 	private List<StorageUnitDisplayPanel> compactDisplays;
 	private StorageUnitDisplayPanel selectedCompactDisplay = null;
 	private StorageUnitDisplayPanel zoomDisplay = new StorageUnitDisplayPanel(
 			null, DisplayMode.FULL);
 	private Controller controller = new Controller();
-	private Repainter repainter;
+	private Updater updater;
+	private PickTraysDialog dlgPickTrays = new PickTraysDialog();
 
 	public StockOverviewPanel(DashboardPanel owner) {
 		this.owner = owner;
@@ -48,10 +62,11 @@ public class StockOverviewPanel extends JPanel implements ClickListener,
 		StorageUnitDisplayPanel.addTraySelectionChangedListener(this);
 
 		this.compactDisplays = new ArrayList<StorageUnitDisplayPanel>();
-		this.repainter = new Repainter(this);
+		this.updater = Updater.getInstance();
+		this.updater.registerObserver(this);
 
 		JPanel pnlEast = new JPanel(), pnlButtons = new JPanel();
-		pnlButtons.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		pnlButtons.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
 		add(pnlEast, BorderLayout.EAST);
 		pnlEast.setLayout(new BoxLayout(pnlEast, BoxLayout.Y_AXIS));
 		pnlEast.setPreferredSize(new Dimension(210, 0));
@@ -65,22 +80,35 @@ public class StockOverviewPanel extends JPanel implements ClickListener,
 		this.btnPickSelected.setPreferredSize(new Dimension(200, 20));
 		this.btnPickSelected.addActionListener(controller);
 		pnlButtons.add(btnPickSelected);
+
 		btnRemoveSelected = new JButton("Remove Selected");
 		this.btnRemoveSelected.setEnabled(false);
 		this.btnRemoveSelected.setPreferredSize(new Dimension(200, 20));
 		this.btnRemoveSelected.addActionListener(controller);
 		pnlButtons.add(btnRemoveSelected);
-		btnSelectAll = new JButton("Select All");
-		this.btnSelectAll.setPreferredSize(new Dimension(200, 20));
-		this.btnSelectAll.addActionListener(controller);
-		pnlButtons.add(btnSelectAll);
+
 		btnClearSelection = new JButton("Clear Selection");
 		this.btnClearSelection.setEnabled(false);
 		this.btnClearSelection.setPreferredSize(new Dimension(200, 20));
 		this.btnClearSelection.addActionListener(controller);
 		pnlButtons.add(btnClearSelection);
 
-		pnlButtons.setPreferredSize(new Dimension(210, 105));
+		btnSelectAll = new JButton("Select All");
+		this.btnSelectAll.setPreferredSize(new Dimension(95, 20));
+		this.btnSelectAll.addActionListener(controller);
+		pnlButtons.add(btnSelectAll);
+
+		btnSelectUnit = new JButton("Select Unit");
+		this.btnSelectUnit.setEnabled(false);
+		this.btnSelectUnit.setPreferredSize(new Dimension(95, 20));
+		this.btnSelectUnit.addActionListener(controller);
+		pnlButtons.add(btnSelectUnit);
+
+		lblSelection = new JLabel("No Trays Selected");
+		this.lblSelection.setPreferredSize(new Dimension(95, 20));
+		pnlButtons.add(lblSelection);
+
+		pnlButtons.setPreferredSize(new Dimension(210, 135));
 
 		pnlStorageUnits = new JPanel();
 		pnlStorageUnits.setLayout(new GridLayout(1, 0, 0, 0));
@@ -90,8 +118,8 @@ public class StockOverviewPanel extends JPanel implements ClickListener,
 		add(scpMain, BorderLayout.CENTER);
 	}
 
-	public Repainter getRepainter() {
-		return this.repainter;
+	public Updater getRepainter() {
+		return this.updater;
 	}
 
 	public void updateDisplay() {
@@ -141,6 +169,12 @@ public class StockOverviewPanel extends JPanel implements ClickListener,
 			if (this.selectedCompactDisplay != null) this.selectedCompactDisplay
 					.setBorder(null);
 			this.selectedCompactDisplay = display;
+			if (this.selectedCompactDisplay != null) {
+				this.btnSelectUnit.setEnabled(true);
+			}
+			else {
+				this.btnSelectUnit.setEnabled(false);
+			}
 			this.zoomDisplay = new StorageUnitDisplayPanel(unit,
 					DisplayMode.FULL);
 			display.setBorder(BorderFactory.createMatteBorder(1, 1, 4, 1,
@@ -166,17 +200,108 @@ public class StockOverviewPanel extends JPanel implements ClickListener,
 		}
 	}
 
+	public void selectUnit() {
+		if (this.stock == null) return;
+		if (selectedCompactDisplay != null
+				&& selectedCompactDisplay.getStorageUnit() != null) {
+			for (Tray tray : selectedCompactDisplay.getStorageUnit().getTrays()) {
+				StorageUnitDisplayPanel.addSelectedTray(tray);
+			}
+		}
+	}
+
+	public void pickSelected() {
+		Set<Tray> trays = StorageUnitDisplayPanel.getSelectedTrays();
+		Set<Stock> stocks = Service.getValidPickDestinations(trays);
+		this.dlgPickTrays.clearStocks();
+		this.dlgPickTrays.setStocks(stocks);
+		this.dlgPickTrays.setRequiresStock(true);
+		for (Tray tray : trays) {
+			State state = tray.getCurrentState();
+			ProductType type = tray.getProductType();
+			if (state != null && type != null) {
+				this.dlgPickTrays.setRequiresStock(!type.isLastState(state));
+				break;
+			}
+		}
+		this.dlgPickTrays.setVisible(true);
+		if (this.dlgPickTrays.getWasAccepted()) {
+			Stock destination = this.dlgPickTrays.getStock();
+			Date time = this.dlgPickTrays.getDate();
+			try {
+				Service.pickTrays(trays, destination, time);
+				this.repaint();
+				JOptionPane.showMessageDialog(
+						this,
+						"The selected trays were picked to "
+								+ destination.getName(), "Picked",
+						JOptionPane.INFORMATION_MESSAGE);
+				StorageUnitDisplayPanel.clearSelection();
+			}
+			catch (OutOfStockSpaceException e) {
+				JOptionPane.showMessageDialog(this, e.getMessage(), "Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+			catch (InconsistencyException e) {
+				JOptionPane.showMessageDialog(this, e.getMessage(), "Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+			catch (StockNotCompatibleException e) {
+				JOptionPane.showMessageDialog(this, e.getMessage(), "Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+			catch (PickTooEarlyException e) {
+				JOptionPane.showMessageDialog(this, e.getMessage(), "Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+			catch (PickTooLateException e) {
+				JOptionPane.showMessageDialog(this, e.getMessage(), "Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	public void removeSelected() {
+		int result = JOptionPane
+				.showConfirmDialog(
+						this,
+						"Are these trays waste (if so, click \"Yes\")? If this is a correction of a bookkeeping error, just click \"No\". ",
+						"Confirm deletion", JOptionPane.YES_NO_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE);
+		if (result == JOptionPane.YES_OPTION) {
+			Service.wasteTrays(StorageUnitDisplayPanel.getSelectedTrays());
+			this.repaint();
+			JOptionPane
+					.showMessageDialog(
+							this,
+							"The selected trays were marked as waste and removed from the storage. ",
+							"Removed", JOptionPane.INFORMATION_MESSAGE);
+			StorageUnitDisplayPanel.clearSelection();
+		}
+		else if (result == JOptionPane.NO_OPTION) {
+			Service.deleteTrays(StorageUnitDisplayPanel.getSelectedTrays());
+			this.repaint();
+			JOptionPane.showMessageDialog(this,
+					"The selected trays were removed from the system. ",
+					"Removed", JOptionPane.INFORMATION_MESSAGE);
+			StorageUnitDisplayPanel.clearSelection();
+		}
+	}
+
 	@Override
 	public void onTraySelectionChanged() {
 		if (StorageUnitDisplayPanel.getSelectedTraysTotal() > 0) {
 			this.btnClearSelection.setEnabled(true);
 			this.btnPickSelected.setEnabled(true);
 			this.btnRemoveSelected.setEnabled(true);
+			this.lblSelection.setText("Trays Selected: "
+					+ StorageUnitDisplayPanel.getSelectedTraysTotal());
 		}
 		else {
 			this.btnClearSelection.setEnabled(false);
 			this.btnPickSelected.setEnabled(false);
 			this.btnRemoveSelected.setEnabled(false);
+			this.lblSelection.setText("No Trays Selected ");
 		}
 	}
 
@@ -189,15 +314,23 @@ public class StockOverviewPanel extends JPanel implements ClickListener,
 				StorageUnitDisplayPanel.clearSelection();
 			}
 			else if (src == StockOverviewPanel.this.btnPickSelected) {
-				// TODO
+				StockOverviewPanel.this.pickSelected();
 			}
 			else if (src == StockOverviewPanel.this.btnRemoveSelected) {
-				// TODO
+				StockOverviewPanel.this.removeSelected();
 			}
 			else if (src == StockOverviewPanel.this.btnSelectAll) {
 				StockOverviewPanel.this.selectAll();
 			}
+			else if (src == StockOverviewPanel.this.btnSelectUnit) {
+				StockOverviewPanel.this.selectUnit();
+			}
 		}
 
+	}
+
+	@Override
+	public void update(UpdateSubject repainter) {
+		this.repaint();
 	}
 }

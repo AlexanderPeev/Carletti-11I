@@ -9,7 +9,7 @@ import java.util.List;
  * @author Thomas Jansen Van Rensburg
  * 
  */
-public class ProductType {
+public class ProductType implements Comparable<ProductType> {
 	private String name;
 	private List<SubProcess> subProcesses = new ArrayList<SubProcess>();
 	private List<Tray> trays = new ArrayList<Tray>();
@@ -45,8 +45,8 @@ public class ProductType {
 	public List<SubProcess> getSubProcesses() {
 		return new ArrayList<SubProcess>(subProcesses);
 	}
-	
-	public void reSortSubProcesses(){
+
+	public void reSortSubProcesses() {
 		Collections.sort(this.subProcesses);
 	}
 
@@ -103,11 +103,32 @@ public class ProductType {
 		}
 	}
 
+	public boolean isLastState(State state) {
+		if (state == null) return false;
+		SubProcess sp = state.getSubProcess();
+		if (sp == null || !this.subProcesses.contains(sp)) return false;
+
+		if (this.subProcesses.indexOf(sp) == this.subProcesses.size() - 1) return true;
+		return false;
+	}
+
 	public SubProcess getNextSubProcess(State state) {
 		if (state == null) return null;
 		SubProcess sp = state.getSubProcess();
-		if (sp == null || !this.subProcesses.contains(sp)
-				|| this.subProcesses.indexOf(sp) < this.subProcesses.size() - 1) return null;
+		if (sp == null
+				|| !this.subProcesses.contains(sp)
+				|| this.subProcesses.indexOf(sp) >= this.subProcesses.size() - 1) return null;
 		return this.subProcesses.get(this.subProcesses.indexOf(sp) + 1);
 	}
+
+	@Override
+	public String toString() {
+		return name + "";
+	}
+
+	@Override
+	public int compareTo(ProductType arg0) {
+		return this.getName().compareToIgnoreCase(arg0.getName());
+	}
+
 }

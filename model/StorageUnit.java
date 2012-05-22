@@ -32,8 +32,12 @@ public class StorageUnit {
 	}
 
 	public void setStock(Stock stock) {
+		if (stock == this.stock) return;
+		if (this.stock != null) {
+			this.stock.removeStorageUnit(this);
+		}
 		this.stock = stock;
-		if (stock != null) {
+		if (this.stock != null) {
 			this.stock.addStorageUnit(this);
 		}
 	}

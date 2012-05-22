@@ -1,12 +1,11 @@
-/**
- * @author Ricardas Risys
- */
-
 package model;
 
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @author Ricardas Risys
+ */
 public class SubProcess implements Comparable<SubProcess> {
 	private int minTime;
 	private int idealTime;
@@ -124,5 +123,10 @@ public class SubProcess implements Comparable<SubProcess> {
 	@Override
 	public int compareTo(SubProcess arg0) {
 		return this.order - arg0.getOrder();
+	}
+
+	@Override
+	public String toString() {
+		return (getOrder() + 1) + ": " + getName();
 	}
 }
