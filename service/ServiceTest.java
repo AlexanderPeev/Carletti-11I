@@ -3,12 +3,18 @@
  */
 package service;
 
-import java.sql.Date;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.Assert;
+import model.InconsistencyException;
+import model.OutOfStockSpaceException;
 import model.ProductType;
 import model.State;
 import model.Stock;
+import model.StockType;
 import model.StorageUnit;
 import model.SubProcess;
 import model.Tray;
@@ -193,10 +199,240 @@ public class ServiceTest {
 
 	/**
 	 * @author Alexander Peev
+	 * @throws PickTooLateException
+	 * @throws PickTooEarlyException
+	 * @throws StockNotCompatibleException
+	 * @throws InconsistencyException
+	 * @throws OutOfStockSpaceException
 	 */
 	@Test
-	public void testPickTrays() {
-		;
+	public void testPickTrays() throws OutOfStockSpaceException,
+			InconsistencyException, StockNotCompatibleException,
+			PickTooEarlyException, PickTooLateException {
+		Stock destination = new Stock("Test stock", StockType.SEMI, 1, 16, 1);
+		StorageUnit su = new StorageUnit(destination, 0);
+		destination.addStorageUnit(su);
+		long t = System.currentTimeMillis();
+		Date time = new Date(t);
+
+		Service.pickTrays(null, destination, time);
+		Assert.assertEquals(0, su.getTrays().size());
+
+		ProductType pt = new ProductType("Test Product Type");
+		SubProcess sp1 = new SubProcess(0, "Test SP 1", 2, 3, 4), sp2 = new SubProcess(
+				1, "Test SP 2", 2, 3, 4);
+		sp1.addStock(destination);
+		sp2.addStock(destination);
+		pt.addSubProcess(sp1);
+		pt.addSubProcess(sp2);
+		Tray t1 = new Tray(pt), t2 = new Tray(pt), t3 = new Tray(pt), t4 = new Tray(
+				pt), t5 = new Tray(pt);
+		Set<Tray> trays = new HashSet<Tray>();
+		trays.add(t1);
+
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.setTime(time);
+		cal.add(GregorianCalendar.MINUTE, 2);
+
+		Service.pickTrays(trays, null, cal.getTime());
+		Assert.assertEquals(0, su.getTrays().size());
+
+		Service.pickTrays(new HashSet<Tray>(), destination, cal.getTime());
+		Assert.assertEquals(0, su.getTrays().size());
+
+		Service.pickTrays(trays, destination, cal.getTime());
+		Assert.assertEquals(1, su.getTrays().size());
+		Assert.assertTrue(su.getTrays().contains(t1));
+		Assert.assertEquals(t1.getCurrentState().getStartTime(), cal.getTime());
+
+		trays.clear();
+		trays.add(t2);
+		trays.add(t3);
+		Service.pickTrays(trays, destination, cal.getTime());
+		Assert.assertEquals(3, su.getTrays().size());
+		Assert.assertTrue(su.getTrays().contains(t1));
+		Assert.assertTrue(su.getTrays().contains(t2));
+		Assert.assertTrue(su.getTrays().contains(t3));
+		Assert.assertEquals(t1.getCurrentState().getStartTime(), cal.getTime());
+		Assert.assertEquals(t2.getCurrentState().getStartTime(), cal.getTime());
+		Assert.assertEquals(t3.getCurrentState().getStartTime(), cal.getTime());
+
+		Date calTime = cal.getTime(), curTime = new Date(
+				System.currentTimeMillis());
+		cal.setTime(curTime);
+		cal.add(GregorianCalendar.MINUTE, -2);
+		t4.getCurrentState().setStartTime(cal.getTime());
+		t5.getCurrentState().setStartTime(cal.getTime());
+		trays.clear();
+		trays.add(t4);
+		trays.add(t5);
+		Service.pickTrays(trays, destination, null);
+		Assert.assertEquals(5, su.getTrays().size());
+		Assert.assertTrue(su.getTrays().contains(t1));
+		Assert.assertTrue(su.getTrays().contains(t2));
+		Assert.assertTrue(su.getTrays().contains(t3));
+		Assert.assertTrue(su.getTrays().contains(t4));
+		Assert.assertTrue(su.getTrays().contains(t5));
+		Assert.assertEquals(t1.getCurrentState().getStartTime(), calTime);
+		Assert.assertEquals(t2.getCurrentState().getStartTime(), calTime);
+		Assert.assertEquals(t3.getCurrentState().getStartTime(), calTime);
+		Assert.assertEquals(t4.getCurrentState().getStartTime(), curTime);
+		Assert.assertEquals(t5.getCurrentState().getStartTime(), curTime);
+
+	}
+
+	/**
+	 * @author Alexander Peev
+	 * @throws PickTooEarlyException
+	 *             or fails the test.
+	 */
+	@Test(expected = PickTooEarlyException.class)
+	public void testPickTraysEarly() throws OutOfStockSpaceException,
+			InconsistencyException, StockNotCompatibleException,
+			PickTooEarlyException, PickTooLateException {
+		Stock destination = new Stock("Test stock", StockType.SEMI, 1, 16, 1);
+		StorageUnit su = new StorageUnit(destination, 0);
+		destination.addStorageUnit(su);
+		long t = System.currentTimeMillis();
+		Date time = new Date(t);
+
+		ProductType pt = new ProductType("Test Product Type");
+		SubProcess sp1 = new SubProcess(0, "Test SP 1", 2, 3, 4), sp2 = new SubProcess(
+				1, "Test SP 2", 2, 3, 4);
+		sp1.addStock(destination);
+		sp2.addStock(destination);
+		pt.addSubProcess(sp1);
+		pt.addSubProcess(sp2);
+		Tray t1 = new Tray(pt);
+		Set<Tray> trays = new HashSet<Tray>();
+		trays.add(t1);
+
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.setTime(time);
+		cal.add(GregorianCalendar.MINUTE, 2);
+		cal.add(GregorianCalendar.SECOND, -1);
+
+		Service.pickTrays(trays, destination, cal.getTime());
+		Assert.assertEquals(1, su.getTrays().size());
+		Assert.assertTrue(su.getTrays().contains(t1));
+		Assert.assertEquals(t1.getCurrentState().getStartTime(), cal.getTime());
+
+		Assert.fail("Exception not thrown!");
+	}
+
+	/**
+	 * @author Alexander Peev
+	 * @throws PickTooLateException
+	 *             or fails the test.
+	 */
+	@Test(expected = PickTooLateException.class)
+	public void testPickTraysLate() throws OutOfStockSpaceException,
+			InconsistencyException, StockNotCompatibleException,
+			PickTooEarlyException, PickTooLateException {
+		Stock destination = new Stock("Test stock", StockType.SEMI, 1, 16, 1);
+		StorageUnit su = new StorageUnit(destination, 0);
+		destination.addStorageUnit(su);
+		long t = System.currentTimeMillis();
+		Date time = new Date(t);
+
+		ProductType pt = new ProductType("Test Product Type");
+		SubProcess sp1 = new SubProcess(0, "Test SP 1", 2, 3, 4), sp2 = new SubProcess(
+				1, "Test SP 2", 2, 3, 4);
+		sp1.addStock(destination);
+		sp2.addStock(destination);
+		pt.addSubProcess(sp1);
+		pt.addSubProcess(sp2);
+		Tray t1 = new Tray(pt);
+		Set<Tray> trays = new HashSet<Tray>();
+		trays.add(t1);
+
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.setTime(time);
+		cal.add(GregorianCalendar.MINUTE, 4);
+
+		Service.pickTrays(trays, destination, cal.getTime());
+		Assert.assertEquals(1, su.getTrays().size());
+		Assert.assertTrue(su.getTrays().contains(t1));
+		Assert.assertEquals(t1.getCurrentState().getStartTime(), cal.getTime());
+
+		Assert.fail("Exception not thrown!");
+	}
+
+	/**
+	 * @author Alexander Peev
+	 * @throws StockNotCompatibleException
+	 *             or fails the test.
+	 */
+	@Test(expected = StockNotCompatibleException.class)
+	public void testPickTraysIncompatible() throws OutOfStockSpaceException,
+			InconsistencyException, StockNotCompatibleException,
+			PickTooEarlyException, PickTooLateException {
+		Stock destination = new Stock("Test stock", StockType.SEMI, 1, 16, 1);
+		StorageUnit su = new StorageUnit(destination, 0);
+		destination.addStorageUnit(su);
+		long t = System.currentTimeMillis();
+		Date time = new Date(t);
+
+		ProductType pt = new ProductType("Test Product Type");
+		SubProcess sp1 = new SubProcess(0, "Test SP 1", 2, 3, 4), sp2 = new SubProcess(
+				1, "Test SP 2", 2, 3, 4);
+		pt.addSubProcess(sp1);
+		pt.addSubProcess(sp2);
+		Tray t1 = new Tray(pt);
+		Set<Tray> trays = new HashSet<Tray>();
+		trays.add(t1);
+
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.setTime(time);
+		cal.add(GregorianCalendar.MINUTE, 2);
+
+		Service.pickTrays(trays, destination, cal.getTime());
+		Assert.assertEquals(1, su.getTrays().size());
+		Assert.assertTrue(su.getTrays().contains(t1));
+		Assert.assertEquals(t1.getCurrentState().getStartTime(), cal.getTime());
+
+		Assert.fail("Exception not thrown!");
+	}
+
+	/**
+	 * @author Alexander Peev
+	 * @throws OutOfStockSpaceException
+	 *             or fails the test.
+	 */
+	@Test(expected = OutOfStockSpaceException.class)
+	public void testPickTraysOverfilled() throws OutOfStockSpaceException,
+			InconsistencyException, StockNotCompatibleException,
+			PickTooEarlyException, PickTooLateException {
+		Stock destination = new Stock("Test stock", StockType.SEMI, 1, 16, 1);
+		StorageUnit su = new StorageUnit(destination, 0);
+		for (int i = 0; i < destination.getMaxTraysPerStorageUnit(); i++) {
+			su.addTray(new Tray());
+		}
+		destination.addStorageUnit(su);
+		long t = System.currentTimeMillis();
+		Date time = new Date(t);
+
+		ProductType pt = new ProductType("Test Product Type");
+		SubProcess sp1 = new SubProcess(0, "Test SP 1", 2, 3, 4), sp2 = new SubProcess(
+				1, "Test SP 2", 2, 3, 4);
+		sp1.addStock(destination);
+		sp2.addStock(destination);
+		pt.addSubProcess(sp1);
+		pt.addSubProcess(sp2);
+		Tray t1 = new Tray(pt);
+		Set<Tray> trays = new HashSet<Tray>();
+		trays.add(t1);
+
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.setTime(time);
+		cal.add(GregorianCalendar.MINUTE, 2);
+
+		Service.pickTrays(trays, destination, cal.getTime());
+		Assert.assertEquals(1, su.getTrays().size());
+		Assert.assertTrue(su.getTrays().contains(t1));
+		Assert.assertEquals(t1.getCurrentState().getStartTime(), cal.getTime());
+
+		Assert.fail("Exception not thrown!");
 	}
 
 }

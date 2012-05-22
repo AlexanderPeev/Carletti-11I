@@ -4,15 +4,43 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
 /**
  * 
  * @author Thomas Jansen Van Rensburg
  * 
  */
+@Entity(name = "product_types")
 public class ProductType implements Comparable<ProductType> {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "product_id")
+	private int id;
+	@Column(name = "product_type_name")
 	private String name;
+	@OneToMany(cascade = CascadeType.ALL)
 	private List<SubProcess> subProcesses = new ArrayList<SubProcess>();
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "productType")
 	private List<Tray> trays = new ArrayList<Tray>();
+
+	public ProductType() {
+
+	}
+
+	public int getId() {
+		return this.id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	/**
 	 * 
@@ -43,6 +71,7 @@ public class ProductType implements Comparable<ProductType> {
 	 * 
 	 */
 	public List<SubProcess> getSubProcesses() {
+		reSortSubProcesses();
 		return new ArrayList<SubProcess>(subProcesses);
 	}
 
@@ -105,6 +134,7 @@ public class ProductType implements Comparable<ProductType> {
 
 	public boolean isLastState(State state) {
 		if (state == null) return false;
+		reSortSubProcesses();
 		SubProcess sp = state.getSubProcess();
 		if (sp == null || !this.subProcesses.contains(sp)) return false;
 
@@ -114,6 +144,7 @@ public class ProductType implements Comparable<ProductType> {
 
 	public SubProcess getNextSubProcess(State state) {
 		if (state == null) return null;
+		reSortSubProcesses();
 		SubProcess sp = state.getSubProcess();
 		if (sp == null
 				|| !this.subProcesses.contains(sp)

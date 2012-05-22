@@ -3,6 +3,13 @@ package model;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Default behavior for storing trays in a stock. It uses the first-fit
+ * principle.
+ * 
+ * @author Alexander Peev
+ * 
+ */
 public class DefaultStockStoreBehavior implements StockStoreBehavior {
 	@Override
 	public void storeTrays(List<Tray> trays, Stock destination) {

@@ -8,6 +8,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Array;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -217,7 +219,9 @@ public class ProductTypeCUDialog extends JDialog {
 	}
 
 	public void fillListSubProcesses() {
-		lstSubProcesses.setListData(productType.getSubProcesses().toArray());
+		List<SubProcess> sps = productType.getSubProcesses();
+		Collections.sort(sps);
+		lstSubProcesses.setListData(sps.toArray());
 	}
 
 	private class Controller implements ActionListener, ListSelectionListener {

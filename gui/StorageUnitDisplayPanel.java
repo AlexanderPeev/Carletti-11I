@@ -84,6 +84,7 @@ public class StorageUnitDisplayPanel extends JPanel implements
 			ProductType productType = selected.getProductType();
 			if (productType != null) productTypes.add(productType);
 			State state = selected.getCurrentState();
+			if (state == null) continue;
 			SubProcess subProcess = state.getSubProcess();
 			if (subProcess != null) subProcesses.add(subProcess);
 		}

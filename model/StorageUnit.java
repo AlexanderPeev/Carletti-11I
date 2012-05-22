@@ -4,15 +4,47 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
+
 /**
  * 
  * @author Tsvetomir Iliev
  * 
  */
+@Entity(name = "storage_units")
 public class StorageUnit {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "storage_unit_id")
+	private int id;
+	@ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+	@JoinColumn(name = "storage_unit_stock")
 	private Stock stock;
+	@OneToMany(cascade = { CascadeType.MERGE, CascadeType.PERSIST }, mappedBy = "storageUnit")
 	private List<Tray> trays = new ArrayList<Tray>();
+	@Column(name = "storage_unit_order")
+	@OrderColumn(name = "storage_unit_order", insertable = true, updatable = true, nullable = false)
 	private int order;
+
+	public int getId() {
+		return this.id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public StorageUnit() {
+	}
 
 	public StorageUnit(Stock stock, int order) {
 		setStock(stock);

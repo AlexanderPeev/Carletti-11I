@@ -3,16 +3,48 @@ package model;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OrderColumn;
+
 /**
  * @author Ricardas Risys
  */
+@Entity(name = "sub_processes")
 public class SubProcess implements Comparable<SubProcess> {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "sub_process_id")
+	private int id;
+	@Column(name = "sub_process_min_time")
 	private int minTime;
+	@Column(name = "sub_process_ideal_time")
 	private int idealTime;
+	@Column(name = "sub_process_max_time")
 	private int maxTime;
+	@Column(name = "sub_process_name")
 	private String name;
+	@Column(name = "sub_process_order")
+	@OrderColumn(name = "sub_process_order", insertable = true, updatable = true, nullable = false)
 	private int order;
+	@ManyToMany(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+	@JoinTable(name = "sub_processes_to_stocks", joinColumns = { @JoinColumn(name = "sub_process_to_stock_stock") }, inverseJoinColumns = { @JoinColumn(name = "sub_process_to_stock_sub_process") })
 	private Set<Stock> stocks = new HashSet<Stock>();
+
+	public int getId() {
+		return this.id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public SubProcess() {
 		this(0, "", 0, 0, 0);

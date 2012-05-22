@@ -221,7 +221,9 @@ public class Service {
 		List<Tray> processed = new ArrayList<Tray>(trays);
 		for (Tray tray : trays) {
 			ProductType type = tray.getProductType();
-			SubProcess sp = tray.getCurrentState().getSubProcess();
+			State cs = tray.getCurrentState();
+			if (cs == null) continue;
+			SubProcess sp = cs.getSubProcess();
 			if ((productType != null && productType != type)
 					|| (subProcess != null && subProcess != sp)) {
 				processed.remove(tray);
@@ -229,7 +231,7 @@ public class Service {
 			else {
 				productType = type;
 				subProcess = sp;
-				state = tray.getCurrentState();
+				state = cs;
 			}
 		}
 		try {
@@ -246,6 +248,7 @@ public class Service {
 		}
 		for (Tray tray : processed) {
 			state = tray.getCurrentState();
+			if (state == null) continue;
 			long end = actualTime.getTime();
 			SubProcess sp = state.getSubProcess();
 			int difference = (int) (Math.abs(end
@@ -271,6 +274,7 @@ public class Service {
 			}
 			return;
 		}
+		else if (destination == null) return;
 
 		if (productType != null
 				&& !productType.getNextSubProcess(state).getStocks()
@@ -280,8 +284,12 @@ public class Service {
 				"The desired amount of trays cannot fit in the destination. ");
 		for (Tray tray : processed) {
 			state = tray.getCurrentState();
-			Service.updateState(state, tray, state.getStartTime(), actualTime);
-			subProcess = tray.getProductType().getNextSubProcess(state);
+			if (state != null) {
+				Service.updateState(state, tray, state.getStartTime(),
+						actualTime);
+				subProcess = tray.getProductType().getNextSubProcess(state);
+			}
+			else subProcess = tray.getProductType().getSubProcesses().get(0);
 			state = Service.createState(subProcess, tray, actualTime, null);
 		}
 		destination.storeTrays(processed);

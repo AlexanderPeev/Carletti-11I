@@ -4,19 +4,49 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
+
 /**
  * 
  * @author Tsvetomir Iliev
  * 
  */
+@Entity(name = "trays")
 public class Tray {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "tray_id")
+	private int id;
+	@ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST }, optional = true)
+	@JoinColumn(name = "tray_storage_unit")
 	private StorageUnit storageUnit;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "tray")
 	private List<State> states = new ArrayList<State>();
+	@ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+	@JoinColumn(name = "tray_product_type")
 	private ProductType productType;
+	@Column(name = "tray_slot_number")
+	@OrderColumn(name = "tray_slot_number", insertable = true, updatable = true)
 	private int slotNumber;
 
+	public int getId() {
+		return this.id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	public Tray() {
-		this(null, null, 0);
 	}
 
 	public Tray(ProductType type) {
@@ -55,7 +85,7 @@ public class Tray {
 			this.storageUnit.removeTray(this);
 		}
 		this.storageUnit = storageUnit;
-		if (storageUnit != null) {
+		if (this.storageUnit != null) {
 			this.storageUnit.addTray(this);
 		}
 	}
@@ -94,6 +124,7 @@ public class Tray {
 	}
 
 	public State getCurrentState() {
+		if (this.states.size() < 1) return null;
 		return this.states.get(this.states.size() - 1);
 	}
 }

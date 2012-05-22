@@ -7,12 +7,42 @@ package model;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
 // blue - too early, green - between min-opt, yellow - opt-max, red - waste
+@Entity(name = "users")
 public class User {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "user_id")
+	private int id;
+	@Column(name = "user_username")
 	private String username;
+	@Column(name = "user_password")
 	private String password;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "user_group")
 	private GroupType group;
+	@Transient
 	private Map<String, Boolean> permissions = new HashMap<String, Boolean>();
+
+	public int getId() {
+		return this.id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public User() {
+	}
 
 	/**
 	 * Constructor

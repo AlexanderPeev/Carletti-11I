@@ -6,22 +6,60 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
 /**
  * The Stock class represents a generic storage location. It could be a
- * production machine, a storage for semi-products, or for finished ones.
+ * production machine, a storage for semi-products, or for finished ones. Uses
+ * the strategy pattern for the store behavior.
  * 
  * @author Alexander Peev
  * 
  */
+@Entity(name = "stocks")
 public class Stock implements Comparable<Stock> {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "stock_id")
+	private int id;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "stock_type")
 	private StockType type;
+	@Column(name = "stock_capacity")
 	private int capacity;
+	@Column(name = "stock_max_trays_per_storage_unit")
 	private int maxTraysPerStorageUnit;
+	@Column(name = "stock_storage_units_per_row")
 	private int storageUnitsPerRow;
+	@Column(name = "stock_name")
 	private String name;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "stock")
 	private List<StorageUnit> storageUnits = new ArrayList<StorageUnit>();
+	@ManyToMany(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+	@JoinTable(name = "stocks_to_sub_processes", joinColumns = { @JoinColumn(name = "sub_process_to_stock_sub_process") }, inverseJoinColumns = { @JoinColumn(name = "sub_process_to_stock_stock") })
 	private Set<SubProcess> subProcesses = new HashSet<SubProcess>();
+	@Transient
 	private StockStoreBehavior storeBehavior = new DefaultStockStoreBehavior();
+
+	public int getId() {
+		return this.id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public Stock() {
 		this("New Stock");
