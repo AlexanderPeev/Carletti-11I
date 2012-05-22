@@ -78,7 +78,7 @@ public class User {
 		}
 		else if (this.group.equals(GroupType.WORKER)) {
 			permissions.put("Dashboard", true);
-			permissions.put("Products", true);
+			permissions.put("Create Trays", true);
 			permissions.put("Logout", true);
 			permissions.put("Create Stock", false);
 		}

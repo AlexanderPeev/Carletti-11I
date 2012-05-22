@@ -55,11 +55,6 @@ public class Dao {
 
 	}
 
-	public void updateTray(Tray tray) {
-		// unused until JPA
-
-	}
-
 	public void addProductType(ProductType productType) {
 		productTypes.add(productType);
 	}
@@ -119,88 +114,122 @@ public class Dao {
 		this.users.remove(user);
 	}
 
+	public void addTray(Tray tray) {
+		// unused until JPA
+	}
+
+	public void updateTray(Tray tray) {
+		// unused until JPA
+	}
+
+	public void removeTray(Tray tray) {
+		// unused until JPA
+	}
+
 	public void createSomeObjects() {
 		this.addUser(new User("worker", "password", GroupType.WORKER));
 		this.addUser(new User("Gumby", "MyBrainHurts", GroupType.WORKER));
 		this.addUser(new User("manager", "password", GroupType.MANAGER));
 		ProductType pt = new ProductType("Skumbananer"), pt2 = new ProductType(
 				"P-Taerter");
-		this.addProductType(pt);
 		Stock semi = new Stock("Semi products - main room", StockType.SEMI,
 				100, 16, 10), cores = new Stock("Cores machine",
 				StockType.MACHINE, 9, 16, 3), coat = new Stock(
 				"Coating machine", StockType.MACHINE, 16, 16, 4), done = new Stock(
 				"Finished", StockType.FINISHED, 64, 16, 8);
-		this.addStock(done);
-		this.addStock(semi);
-		this.addStock(cores);
-		this.addStock(coat);
 		SubProcess sp = null;
-		pt.addSubProcess(sp = new SubProcess(0, "Core Production", 20, 30, 40));
+		pt.addSubProcess(sp = new SubProcess(0, "Core Production", 2, 4, 6));
 		sp.addStock(cores);
-		pt.addSubProcess(sp = new SubProcess(1, "Core Drying", 20, 30, 40));
+		pt.addSubProcess(sp = new SubProcess(1, "Core Drying", 2, 4, 6));
 		sp.addStock(semi);
-		pt.addSubProcess(sp = new SubProcess(2, "Coating", 20, 30, 40));
+		pt.addSubProcess(sp = new SubProcess(2, "Coating", 2, 4, 6));
 		sp.addStock(coat);
-		pt.addSubProcess(sp = new SubProcess(3, "Drying", 20, 30, 40));
+		pt.addSubProcess(sp = new SubProcess(3, "Drying", 2, 4, 6));
 		sp.addStock(semi);
-		pt.addSubProcess(sp = new SubProcess(4, "Second Coating", 20, 30, 40));
+		pt.addSubProcess(sp = new SubProcess(4, "Second Coating", 2, 4, 6));
 		sp.addStock(coat);
-		pt.addSubProcess(sp = new SubProcess(5, "Last Drying", 20, 30, 40));
+		pt.addSubProcess(sp = new SubProcess(5, "Last Drying", 2, 4, 6));
 		sp.addStock(done);
 
-		pt2.addSubProcess(sp = new SubProcess(0, "Core Production", 20, 30, 40));
+		pt2.addSubProcess(sp = new SubProcess(0, "Core Production", 2, 4, 6));
 		sp.addStock(cores);
-		pt2.addSubProcess(sp = new SubProcess(1, "Core Drying", 20, 30, 40));
+		pt2.addSubProcess(sp = new SubProcess(1, "Core Drying", 2, 4, 6));
 		sp.addStock(semi);
-		pt2.addSubProcess(sp = new SubProcess(2, "Coating", 20, 30, 40));
+		pt2.addSubProcess(sp = new SubProcess(2, "Coating", 2, 4, 6));
 		sp.addStock(coat);
-		pt2.addSubProcess(sp = new SubProcess(3, "Drying", 20, 30, 40));
+		pt2.addSubProcess(sp = new SubProcess(3, "Drying", 2, 4, 6));
 		sp.addStock(semi);
-		pt2.addSubProcess(sp = new SubProcess(4, "Second Coating", 20, 30, 40));
+		pt2.addSubProcess(sp = new SubProcess(4, "Second Coating", 2, 4, 6));
 		sp.addStock(coat);
-		pt2.addSubProcess(sp = new SubProcess(5, "Last Drying", 20, 30, 40));
+		pt2.addSubProcess(sp = new SubProcess(5, "Last Drying", 2, 4, 6));
 		sp.addStock(done);
 
 		sp = pt.getSubProcesses().get(0);
-		for (int i = 0; i < 50; i++) {
-			StorageUnit su = new StorageUnit(semi, i);
+		for (int i = 0; i < 5; i++) {
+			StorageUnit su = new StorageUnit(cores, i);
 			int cap = (int) Math.ceil(Math.max(.75, Math.random())
-					* semi.getMaxTraysPerStorageUnit());
+					* cores.getMaxTraysPerStorageUnit());
 			for (int j = 0; j < cap; j++) {
 				Tray tray = new Tray(su, pt, 0);
 				State s = new State(tray, new Date(System.currentTimeMillis()));
 				s.setSubProcess(sp);
 				tray.addState(s);
 				su.addTray(tray);
+				this.addTray(tray);
 			}
-			semi.addStorageUnit(su);
+			cores.addStorageUnit(su);
 		}
 		sp = pt2.getSubProcesses().get(0);
-		for (int i = 50; i < 100; i++) {
-			StorageUnit su = new StorageUnit(semi, i);
+		for (int i = 5; i < 9; i++) {
+			StorageUnit su = new StorageUnit(cores, i);
 			int cap = (int) Math.ceil(Math.max(.75, Math.random())
-					* semi.getMaxTraysPerStorageUnit());
+					* cores.getMaxTraysPerStorageUnit());
 			for (int j = 0; j < cap; j++) {
 				Tray tray = new Tray(su, pt2, 0);
 				State s = new State(tray, new Date(System.currentTimeMillis()));
 				s.setSubProcess(sp);
 				tray.addState(s);
 				su.addTray(tray);
+				this.addTray(tray);
 			}
-			semi.addStorageUnit(su);
+			cores.addStorageUnit(su);
 		}
 
 		for (int i = 0; i < done.getCapacity(); i++) {
 			done.addStorageUnit(new StorageUnit(done, i));
 		}
 
-		for (int i = 0; i < cores.getCapacity(); i++) {
-			cores.addStorageUnit(new StorageUnit(cores, i));
+		for (int i = 0; i < semi.getCapacity(); i++) {
+			semi.addStorageUnit(new StorageUnit(semi, i));
 		}
 
 		for (int i = 0; i < coat.getCapacity(); i++) {
 			coat.addStorageUnit(new StorageUnit(coat, i));
 		}
+		this.addProductType(pt);
+		this.addProductType(pt2);
+		this.addStock(done);
+		this.addStock(semi);
+		this.addStock(cores);
+		this.addStock(coat);
+	}
+
+	public void assignSubProcessToStock(Stock stock, SubProcess subProcess) {
+		stock.addSubProcess(subProcess);
+		subProcess.addStock(stock);
+	}
+
+	public void unsignSubProcessFromStock(Stock stock, SubProcess subProcess) {
+		stock.removeSubProcess(subProcess);
+		subProcess.removeStock(stock);
+
+	}
+
+	public void addStorageUnit(StorageUnit unit) {
+		// unused until JPA
+	}
+
+	public void removeStorageUnit(StorageUnit unit) {
+		// unused until JPA
 	}
 }

@@ -21,6 +21,7 @@ public class Stock implements Comparable<Stock> {
 	private String name;
 	private List<StorageUnit> storageUnits = new ArrayList<StorageUnit>();
 	private Set<SubProcess> subProcesses = new HashSet<SubProcess>();
+	private StockStoreBehavior storeBehavior = new DefaultStockStoreBehavior();
 
 	public Stock() {
 		this("New Stock");
@@ -119,6 +120,11 @@ public class Stock implements Comparable<Stock> {
 
 	public Iterator<StorageUnit> getStorageUnitsIterator() {
 		return storageUnits.iterator();
+	}
+
+	public StorageUnit getStorageUnitAt(int index) {
+		if (index < 0 || index >= this.storageUnits.size()) return null;
+		return storageUnits.get(index);
 	}
 
 	public int getStorageUnitsTotal() {
@@ -224,17 +230,19 @@ public class Stock implements Comparable<Stock> {
 	 */
 	public void storeTrays(List<Tray> trays) throws OutOfStockSpaceException,
 			InconsistencyException {
-		if (trays == null || trays.size() < 1) return;
+		if (trays == null) return;
+		Iterator<Tray> i = trays.iterator();
+		while (i.hasNext()) {
+			Tray tray = i.next();
+			if (tray.getStorageUnit() != null
+					&& tray.getStorageUnit().getStock() == this) i.remove();
+		}
+		if (trays.size() < 1) return;
 		if (!this.canFit(trays.size())) throw new OutOfStockSpaceException(
 				"The desired amount of trays cannot fit in the Stock. ");
-		for (StorageUnit unit : this.storageUnits) {
-			for (int taken = unit.getTrays().size(); taken < this.maxTraysPerStorageUnit; taken++) {
-				Tray tray = trays.remove(0);
-				unit.addTray(tray);
-				if (trays.size() < 1) return;
-			}
-		}
-		throw new InconsistencyException(
+		if (this.storeBehavior == null) this.storeBehavior = new DefaultStockStoreBehavior();
+		this.storeBehavior.storeTrays(trays, this);
+		if (trays.size() > 0) throw new InconsistencyException(
 				"Inconsistency detected! Not all trays were deposited at the destination. ");
 	}
 

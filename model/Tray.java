@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,6 +19,10 @@ public class Tray {
 		this(null, null, 0);
 	}
 
+	public Tray(ProductType type) {
+		this(null, type, 0);
+	}
+
 	public Tray(StorageUnit storageUnit) {
 		this(storageUnit, null, 0);
 	}
@@ -27,7 +32,8 @@ public class Tray {
 		setStorageUnit(storageUnit);
 		setProductType(productType);
 
-		State state = new State(this);
+		State state = new State(this, new Date(System.currentTimeMillis()));
+		state.setSubProcess(productType.getSubProcesses().get(0));
 		addState(state);
 	}
 
@@ -44,6 +50,10 @@ public class Tray {
 	}
 
 	public void setStorageUnit(StorageUnit storageUnit) {
+		if (this.storageUnit == storageUnit) return;
+		if (this.storageUnit != null) {
+			this.storageUnit.removeTray(this);
+		}
 		this.storageUnit = storageUnit;
 		if (storageUnit != null) {
 			this.storageUnit.addTray(this);
@@ -57,7 +67,7 @@ public class Tray {
 	public void addState(State state) {
 		if (!this.states.contains(state)) {
 			this.states.add(state);
-			state.setTray(this);
+			if (state != null) state.setTray(this);
 		}
 	}
 
@@ -73,14 +83,14 @@ public class Tray {
 	}
 
 	public void setProductType(ProductType productType) {
+		if (this.productType == productType) return;
+		if (this.productType != null) {
+			this.productType.removeTray(this);
+		}
 		this.productType = productType;
 		if (productType != null) {
 			this.productType.addTray(this);
 		}
-	}
-
-	public State nextState(Stock stock) {
-		return null; // TODO Tsvetomir - look at the Pick a unit use case DSD.
 	}
 
 	public State getCurrentState() {

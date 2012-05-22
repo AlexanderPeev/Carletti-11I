@@ -7,6 +7,7 @@ package model;
 import java.util.Date;
 
 public class State {
+	public static final State wasted = new State();
 	private Date startTime;
 	private Date endTime;
 	private Tray tray;
@@ -40,6 +41,9 @@ public class State {
 		setTray(tray);
 		setStartTime(startTime);
 		setEndTime(endTime);
+	}
+
+	public State() {
 	}
 
 	/**

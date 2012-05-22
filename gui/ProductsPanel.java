@@ -5,15 +5,20 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.JButton;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import model.ProductType;
-
-
+import service.ProductTypeInProductionException;
+import service.Service;
 
 public class ProductsPanel extends JPanel {
 
@@ -24,7 +29,9 @@ public class ProductsPanel extends JPanel {
 	private JList lstProductTypes;
 	private JScrollPane scrollPane;
 	private ProductTypeCUDialog productTypeCUDialog;
-	
+	// private List<ProductType> productTypes = new
+	// ArrayList<ProductType>(Service.getAllProductTypes());
+
 	private final Controller controller = new Controller();
 
 	public ProductsPanel(MainFrame owner) {
@@ -33,10 +40,10 @@ public class ProductsPanel extends JPanel {
 
 		lstProductTypes = new JList();
 		this.productTypeCUDialog = new ProductTypeCUDialog();
-		
+		lstProductTypes.addListSelectionListener(controller);
+
 		scrollPane = new JScrollPane(lstProductTypes);
 		this.add(scrollPane, BorderLayout.CENTER);
-		
 
 		JPanel pnlButtons = new JPanel();
 		pnlButtons.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 10));
@@ -45,57 +52,109 @@ public class ProductsPanel extends JPanel {
 		btnCreate = new JButton("Create");
 		btnCreate.setPreferredSize(new Dimension(200, 20));
 		btnCreate.addActionListener(controller);
-		//this.add(btnCreate);
 
 		btnEdit = new JButton("Edit");
 		btnEdit.setPreferredSize(new Dimension(200, 20));
 		btnEdit.addActionListener(controller);
-		//this.add(btnEdit);
+		btnEdit.setEnabled(false);
 
 		btnDelete = new JButton("Delete");
 		btnDelete.setPreferredSize(new Dimension(200, 20));
 		btnDelete.addActionListener(controller);
-		//this.add(btnDelete);
-
-		// Component rigidArea = Box.createRigidArea(new Dimension(20, 20));
-		// Component rigidArea2 = Box.createRigidArea(new Dimension(20, 20));
+		btnDelete.setEnabled(false);
 
 		pnlButtons.add(btnCreate);
-		// pnlButtons.add(rigidArea);
 		pnlButtons.add(btnEdit);
-		// pnlButtons.add(rigidArea2);
 		pnlButtons.add(btnDelete);
 
 		this.add(pnlButtons, BorderLayout.EAST);
+		fillLstProductTypes();
 	}
 
 	public MainFrame getOwner() {
 		return this.owner;
 	}
-	
-	class Controller implements ActionListener{
+
+	public void fillLstProductTypes() {
+		ArrayList<ProductType> types = new ArrayList<ProductType>(
+				Service.getAllProductTypes());
+		Collections.sort(types);
+		lstProductTypes.setListData(types.toArray());
+	}
+
+	class Controller implements ActionListener, ListSelectionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == btnCreate) {
-				productTypeCUDialog.setProductType(null);
+				productTypeCUDialog.setTitle("Create Product Type");
+				productTypeCUDialog.clearText();
 				productTypeCUDialog.setVisible(true);
-				System.out.println("create pressed");
+
+				if (productTypeCUDialog.isClosedByOk()) {
+					fillLstProductTypes();
+					lstProductTypes.setSelectedValue(
+							productTypeCUDialog.getProductType(), true);
+					/*
+					 * int lastIndex = lstProductTypes.getModel().getSize() - 1;
+					 * lstProductTypes.setSelectedIndex(lastIndex);
+					 * lstProductTypes.ensureIndexIsVisible(lastIndex);
+					 */
+				}
 			}
-			else if (e.getSource() == btnEdit) {
+
+			if (e.getSource() == btnEdit) {
 				Object sel = lstProductTypes.getSelectedValue();
-				if(sel != null && sel instanceof ProductType){
+
+				if (sel != null && sel instanceof ProductType) {
+					int selectedIndex = lstProductTypes.getSelectedIndex();
 					ProductType p = (ProductType) sel;
+					productTypeCUDialog.clearText();
 					productTypeCUDialog.setProductType(p);
 					productTypeCUDialog.setVisible(true);
+					if (productTypeCUDialog.isClosedByOk()) {
+						fillLstProductTypes();
+						lstProductTypes.setSelectedIndex(selectedIndex);
+						lstProductTypes.ensureIndexIsVisible(selectedIndex);
+					}
 				}
 			}
-			else if (e.getSource() == btnDelete) {
+
+			if (e.getSource() == btnDelete) {
 				Object sel = lstProductTypes.getSelectedValue();
-				if(sel != null && sel instanceof ProductType){
+
+				if (sel != null && sel instanceof ProductType) {
 					ProductType p = (ProductType) sel;
-					p.getName(); //TODO: Finish Delete
+					int answer = JOptionPane.showConfirmDialog(
+
+					ProductsPanel.this,
+							"Are you sure you want to delete " + p.getName()
+									+ "?", "Delete product type",
+							JOptionPane.YES_NO_OPTION);
+					if (answer == JOptionPane.YES_OPTION) {
+						try {
+							Service.deleteProductType(p);
+						}
+						catch (ProductTypeInProductionException ex) {
+							JOptionPane.showMessageDialog(ProductsPanel.this,
+									ex.getMessage(), "Error",
+									JOptionPane.ERROR_MESSAGE);
+						}
+						fillLstProductTypes();
+					}
 				}
+			}
+		}
+
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			if (lstProductTypes.getSelectedValues().length == 1) {
+				btnEdit.setEnabled(true);
+				btnDelete.setEnabled(true);
+			}
+			else {
+				btnEdit.setEnabled(false);
+				btnDelete.setEnabled(false);
 			}
 		}
 	}

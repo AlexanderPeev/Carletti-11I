@@ -196,8 +196,8 @@ public class StorageUnitDisplayPanel extends JPanel implements
 						SubProcess subProcess = state.getSubProcess();
 						text = j + ": " + subProcess.getName() + " - "
 								+ productType.getName();
-						int difference = (int) (Math.abs(end
-								- state.getStartTime().getTime()) / 60000);
+						int difference = (int) ((end - state.getStartTime()
+								.getTime()) / 60000);
 						if (subProcess.getMinTime() > difference) {
 							fillColor = StockState.getColor(StockState.EARLY);
 						}
