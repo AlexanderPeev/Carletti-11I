@@ -28,6 +28,11 @@ import model.SubProcess;
 import service.Service;
 import service.SubProcessException;
 
+/**
+ * Screen that shows the subprocesses of a product type.
+ * 
+ * @author Thomas Van Rensburg
+ */
 public class ProductTypeCUDialog extends JDialog {
 	private JTextField txtProdName;
 	private JLabel lblProdName;

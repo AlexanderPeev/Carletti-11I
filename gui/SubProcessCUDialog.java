@@ -1,7 +1,3 @@
-/**
- * @author Ricardas Risys
- */
-
 package gui;
 
 import java.awt.BorderLayout;
@@ -32,6 +28,9 @@ import model.SubProcess;
 import service.Service;
 import service.SubProcessException;
 
+/**
+ * @author Ricardas Risys
+ */
 public class SubProcessCUDialog extends JDialog {
 
 	private ProductTypeCUDialog main = null;
@@ -234,16 +233,19 @@ public class SubProcessCUDialog extends JDialog {
 				subProcess = Service.createSubProcess(productType, productType
 						.getSubProcesses().size(), subProcessName, minTime,
 						idealTime, maxTime);
-			} else {
+			}
+			else {
 				Service.updateSubProcess(subProcess, subProcess.getOrder(),
 						subProcessName, minTime, idealTime, maxTime);
 			}
 
-		} catch (SubProcessException e) {
+		}
+		catch (SubProcessException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage(), "Error",
 					JOptionPane.ERROR_MESSAGE);
 			return false;
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			JOptionPane.showMessageDialog(this, "Check the data in fields",
 					"Bad Data", JOptionPane.WARNING_MESSAGE);
 			return false;
@@ -290,13 +292,15 @@ public class SubProcessCUDialog extends JDialog {
 			if (subProcess != null) {
 				if (lstAllStocks.getSelectedValues().length > 0) {
 					btnAllToAssigned.setEnabled(true);
-				} else {
+				}
+				else {
 					btnAllToAssigned.setEnabled(false);
 				}
 
 				if (lstAssignedStocks.getSelectedValues().length > 0) {
 					btnAssignedToAll.setEnabled(true);
-				} else {
+				}
+				else {
 					btnAssignedToAll.setEnabled(false);
 				}
 			}

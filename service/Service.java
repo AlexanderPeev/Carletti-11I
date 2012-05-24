@@ -358,6 +358,9 @@ public class Service {
 	}
 
 	/**
+	 * Creates a product type eg. Skumbananer for which subprocesses and trays
+	 * can be created.
+	 * 
 	 * @author Thomas Van Rensburg
 	 */
 	public static ProductType createProductType(String name) {
@@ -372,6 +375,8 @@ public class Service {
 
 	/**
 	 * @author Thomas Van Rensburg
+	 * @param productType
+	 * @param name
 	 */
 	public static void updateProductType(ProductType productType, String name) {
 		if (productType == null) return;
@@ -381,6 +386,9 @@ public class Service {
 	}
 
 	/**
+	 * Removes a product type. If product type is in production, a
+	 * ProductTypeInProductionException will be thrown.
+	 * 
 	 * @author Thomas Van Rensburg
 	 * @throws ProductTypeInProductionException
 	 */
@@ -403,37 +411,44 @@ public class Service {
 	}
 
 	/**
+	 * Changes the subprocess order. Swaps the current subprocess associated
+	 * with a product type with the previous subprocess.
+	 * 
 	 * @author Thomas Van Rensburg
 	 */
 	public static void moveSubProcessUp(SubProcess subProcess,
 			ProductType productType) {// passing product type because one
-										// directional link in diagram
+		// directional link in diagram
 		List<SubProcess> subProcesses = productType.getSubProcesses();
 		if (!subProcesses.contains(subProcess)) return;
-		int index = subProcesses.indexOf(subProcess), current = subProcess
-				.getOrder();// stores order current subprocess
+		int index = subProcesses.indexOf(subProcess);// stores order current
+														// subprocess
+		int current = subProcess.getOrder();
 		if (index < 1) return;// check if first element
 
 		SubProcess previous = subProcesses.get(index - 1);// get the previous
-															// element
+		// element
 		subProcess.setOrder(previous.getOrder());// swap the orders
 		previous.setOrder(current);// swap the orders
 		productType.reSortSubProcesses();// resort subprocesses to the new order
-											// after a movement
+		// after a movement
 
 		dao.updateSubProcess(subProcess);// update dao for jpa purposes
 		dao.updateSubProcess(previous);
 	}
 
 	/**
+	 * Changes the subprocess order. Swaps the current subprocess associated
+	 * with a product type with the next subprocess.
+	 * 
 	 * @author Thomas Van Rensburg
 	 */
 	public static void moveSubProcessDown(SubProcess subProcess,
 			ProductType productType) {
 		List<SubProcess> subProcesses = productType.getSubProcesses();
 		if (!subProcesses.contains(subProcess)) return;
-		int index = subProcesses.indexOf(subProcess), current = subProcess
-				.getOrder();
+		int index = subProcesses.indexOf(subProcess);
+		int current = subProcess.getOrder();
 		if (index < 0 || index >= subProcesses.size() - 1) return;
 
 		SubProcess next = subProcesses.get(index + 1);
@@ -446,6 +461,9 @@ public class Service {
 	}
 
 	/**
+	 * Creates the state of a tray. The state is the representation of a tray at
+	 * a given time.
+	 * 
 	 * @author Thomas Van Rensburg
 	 */
 	public static State createState(SubProcess subProcess, Tray tray,
@@ -465,6 +483,8 @@ public class Service {
 	}
 
 	/**
+	 * Updates the state of a tray at a given time.
+	 * 
 	 * @author Thomas Van Rensburg
 	 */
 	public static void updateState(State state, Tray tray, Date startTime,
@@ -534,13 +554,6 @@ public class Service {
 	 * invalid SubProcessException will be raised
 	 * 
 	 * @author Ricardas Risys
-	 * @param subProcess
-	 * @param order
-	 * @param name
-	 * @param minTime
-	 * @param idealTime
-	 * @param maxTime
-	 * @throws SubProcessException
 	 */
 	public static void updateSubProcess(SubProcess subProcess, int order,
 			String name, int minTime, int idealTime, int maxTime)
@@ -572,10 +585,6 @@ public class Service {
 	 * SubProcessException if data is invalid
 	 * 
 	 * @author Ricardas Risys
-	 * @param minTime
-	 * @param idealTime
-	 * @param maxTime
-	 * @throws SubProcessException
 	 */
 	public static void validateSubProcessTimes(int minTime, int idealTime,
 			int maxTime) throws SubProcessException {
@@ -594,9 +603,6 @@ public class Service {
 	 * process object is null, nothing will happen
 	 * 
 	 * @author Ricardas Risys
-	 * @param productType
-	 * @param subProcess
-	 * @throws SubProcessException
 	 */
 	public static void deleteSubProcess(ProductType productType,
 			SubProcess subProcess) throws SubProcessException {
@@ -618,7 +624,6 @@ public class Service {
 	 * Gets all assigned sub processes for stock object
 	 * 
 	 * @author Ricardas Risys
-	 * @param stock
 	 */
 	public static Set<SubProcess> getStockSubProcesses(Stock stock) {
 		return stock.getSubProcesses();
@@ -628,7 +633,6 @@ public class Service {
 	 * Gets all assigned stocks for sub process object
 	 * 
 	 * @author Ricardas Risys
-	 * @param subProcess
 	 */
 	public static Set<Stock> getSubProcessStocks(SubProcess subProcess) {
 		return subProcess.getStocks();
@@ -640,9 +644,6 @@ public class Service {
 	 * will not be created
 	 * 
 	 * @author Ricardas Risys
-	 * @param username
-	 * @param password
-	 * @param group
 	 * @return user or null
 	 */
 	public static User createUser(String username, String password,
@@ -664,10 +665,6 @@ public class Service {
 	 * update process.
 	 * 
 	 * @author Ricardas Risys
-	 * @param user
-	 * @param username
-	 * @param password
-	 * @param group
 	 */
 	public static void updateUser(User user, String username, String password,
 			GroupType group) {
@@ -822,15 +819,21 @@ public class Service {
 	}
 
 	/**
+	 * Here we create a tray with the attributes "productType" which describes
+	 * the product in the system, the stock from where we can see and choose the
+	 * next destination of the tray and amount where we specify how much trays
+	 * we want to create. In this method we have 2 exceptions
+	 * "InconsistencyExeception" notifies us when program can't manage to add
+	 * the trays to the stock by some reason. "OutofStockSpaceExceptions"
+	 * notifies us when trays can't fit into the stock.
 	 * 
 	 * @author Tsvetomir Iliev
-	 * @throws InconsistencyException
-	 * @throws OutOfStockSpaceException
 	 */
 	public static Set<Tray> createTrays(ProductType productType, Stock stock,
 			int amount) throws OutOfStockSpaceException, InconsistencyException {
 		Set<Tray> trays = new HashSet<Tray>();
 		List<Tray> store = new ArrayList<Tray>();
+		if (stock == null || productType == null) return null;
 		if (!stock.canFit(amount)) {
 			int total = 0;
 			Iterator<StorageUnit> i = stock.getStorageUnitsIterator();
@@ -858,6 +861,8 @@ public class Service {
 	}
 
 	/**
+	 * With "deleteTrays" we actually delete the trays in the collection passwd
+	 * as a parameter.
 	 * 
 	 * @author Tsvetomir Iliev
 	 */
@@ -869,6 +874,7 @@ public class Service {
 	}
 
 	/**
+	 * With "deleteTray" we remove a tray from the system.
 	 * 
 	 * @author Tsvetomir Iliev
 	 */
@@ -879,6 +885,15 @@ public class Service {
 	}
 
 	/**
+	 * The method “getExpiringTrays“ monitors and notifies us if any trays are
+	 * about to expire. In other words expired trays may be avoided, thus
+	 * helping us to minimize waste. start is the time when the new state of the
+	 * trays begins. "maxTime" is the maximum time that the tray can have before
+	 * expiring,in other words if the "maxTime" is reached then the tray is
+	 * expired. "idealTime" means the ideal time of picking the trays "diff" is
+	 * the difference of time between the start and the current time and if the
+	 * difference is more than the "idealTime" and less than the "maxTime" then
+	 * we notify that the trays are going to expire.
 	 * 
 	 * @author Tsvetomir Iliev
 	 */
@@ -888,6 +903,7 @@ public class Service {
 			for (StorageUnit storageUnit : stock.getStorageUnits()) {
 				for (Tray tray : storageUnit.getTrays()) {
 					State state = tray.getCurrentState();
+					if (state == null) continue;
 					SubProcess subProcess = state.getSubProcess();
 
 					long start = state.getStartTime().getTime();
@@ -906,6 +922,12 @@ public class Service {
 
 	/**
 	 * 
+	 * Here "getWastedTrays" notifies us of trays which are already expire in
+	 * other words wasted. "start" is the time when the new state of the trays
+	 * begins. "idealTime" means the ideal time of picking the trays "diff" is
+	 * the difference of time between the start and the current time and if the
+	 * difference is more than than the "maxTime" then the trays are wasted.
+	 * 
 	 * @author Tsvetomir Iliev
 	 */
 	public static Set<Tray> getWastedTrays() {
@@ -914,6 +936,7 @@ public class Service {
 			for (StorageUnit storageUnit : stock.getStorageUnits()) {
 				for (Tray tray : storageUnit.getTrays()) {
 					State state = tray.getCurrentState();
+					if (state == null) continue;
 					SubProcess subProcess = state.getSubProcess();
 
 					long start = state.getStartTime().getTime();
@@ -929,6 +952,13 @@ public class Service {
 		return wasted;
 	}
 
+	/**
+	 * Marks a number of trays as waste and removes them from their stock while
+	 * still keeping them in the system.
+	 * 
+	 * @author Alexander Peev
+	 * @param trays
+	 */
 	public static void wasteTrays(Collection<Tray> trays) {
 		if (trays == null) return;
 		for (Tray tray : trays) {
@@ -936,6 +966,13 @@ public class Service {
 		}
 	}
 
+	/**
+	 * Marks a tray as waste and removes it from its stock while still keeping
+	 * it in the system.
+	 * 
+	 * @author Alexander Peev
+	 * @param tray
+	 */
 	private static void wasteTray(Tray tray) {
 		if (tray == null) return;
 		tray.setStorageUnit(null);

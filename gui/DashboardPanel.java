@@ -1,10 +1,3 @@
-/**
- * A panel for displaying the contents of all Stock objects. It provides a visual
- * representation of all stock units.
- * 
- * @author Ricardas Risys
- */
-
 package gui;
 
 import java.awt.BorderLayout;
@@ -31,6 +24,12 @@ import model.User;
 import service.Service;
 import service.StockNotEmptyException;
 
+/**
+ * A panel for displaying the contents of all Stock objects. It provides a
+ * visual representation of all stock units.
+ * 
+ * @author Ricardas Risys
+ */
 public class DashboardPanel extends JPanel implements UpdateObserver {
 
 	private MainFrame owner = null;

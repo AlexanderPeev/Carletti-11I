@@ -231,10 +231,10 @@ public class StockOverviewPanel extends JPanel implements ClickListener,
 			try {
 				Service.pickTrays(trays, destination, time);
 				this.repaint();
-				JOptionPane.showMessageDialog(
-						this,
-						"The selected trays were picked to "
-								+ destination.getName(), "Picked",
+				String message = "The selected trays were picked out of production. They are now finished. ";
+				if (destination != null) message = "The selected trays were picked to "
+						+ destination.getName() + ". ";
+				JOptionPane.showMessageDialog(this, message, "Picked",
 						JOptionPane.INFORMATION_MESSAGE);
 				StorageUnitDisplayPanel.clearSelection();
 			}

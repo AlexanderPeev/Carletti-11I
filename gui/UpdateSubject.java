@@ -1,8 +1,8 @@
+package gui;
+
 /**
  * @author Ricardas Risys
  */
-package gui;
-
 public interface UpdateSubject {
 	public void registerObserver(UpdateObserver o);
 

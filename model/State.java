@@ -32,8 +32,8 @@ public class State {
 	@ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
 	@JoinColumn(name = "state_tray")
 	private Tray tray;
-	@ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
-	@JoinColumn(name = "state_sub_process")
+	@ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST }, optional = true)
+	@JoinColumn(name = "state_sub_process", nullable = true)
 	private SubProcess subProcess;
 
 	public int getId() {
@@ -44,27 +44,23 @@ public class State {
 		this.id = id;
 	}
 
+	/**
+	 * Empty constructor for JPA purposes
+	 */
 	public State() {
 	}
 
-	/**
-	 * 
-	 * @param tray
-	 */
 	public State(Tray tray) {
 		this(tray, null, null);
 	}
 
-	/**
-	 * 
-	 * @param tray
-	 * @param startTime
-	 */
 	public State(Tray tray, Date startTime) {
 		this(tray, startTime, null);
 	}
 
 	/**
+	 * Creates a state of production that a tray passes through before
+	 * completion.
 	 * 
 	 * @param tray
 	 * @param startTime
@@ -76,50 +72,26 @@ public class State {
 		setEndTime(endTime);
 	}
 
-	/**
-	 * 
-	 * 
-	 */
 	public Date getStartTime() {
 		return startTime;
 	}
 
-	/**
-	 * 
-	 * @param startTime
-	 */
 	public void setStartTime(Date startTime) {
 		this.startTime = startTime;
 	}
 
-	/**
-	 * 
-	 * 
-	 */
 	public Date getEndTime() {
 		return endTime;
 	}
 
-	/**
-	 * 
-	 * @param endTime
-	 */
 	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
 	}
 
-	/**
-	 * 
-	 * 
-	 */
 	public Tray getTray() {
 		return tray;
 	}
 
-	/**
-	 * 
-	 * @param tray
-	 */
 	public void setTray(Tray tray) {
 		this.tray = tray;
 		if (tray != null) {
@@ -127,18 +99,10 @@ public class State {
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 */
 	public SubProcess getSubProcess() {
 		return subProcess;
 	}
 
-	/**
-	 * 
-	 * @param subProcess
-	 */
 	public void setSubProcess(SubProcess subProcess) {
 		this.subProcess = subProcess;
 	}

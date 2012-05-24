@@ -63,6 +63,9 @@ public class StorageUnit {
 		this.order = order;
 	}
 
+	/**
+	 * Link is bidirectional and maintained from both sides
+	 */
 	public void setStock(Stock stock) {
 		if (stock == this.stock) return;
 		if (this.stock != null) {
@@ -78,6 +81,9 @@ public class StorageUnit {
 		return new ArrayList<Tray>(trays);
 	}
 
+	/**
+	 * Link is bidirectional and maintained from both sides
+	 */
 	public void addTray(Tray tray) {
 		if (!this.trays.contains(tray)) {
 			this.setSlotNumber(tray);
@@ -86,13 +92,10 @@ public class StorageUnit {
 		}
 	}
 
-	// In the method setSlotnumber we put slotNumber to -1 so later to be able
-	// to
-	// check for any holes in the tray,we declare a list as well where later
-	// we put the numbers in it.With collections.sort we sort the numbers from
-	// lowest to highest
-	// After that we go through all num and check for holes.
-
+	/**
+	 * "setSlotNumber" is a method that creates a number for the slot where the
+	 * tray is going to be put.
+	 */
 	public void setSlotNumber(Tray tray) {
 		int slotNumber = -1;
 		List<Integer> numbers = new ArrayList<Integer>();

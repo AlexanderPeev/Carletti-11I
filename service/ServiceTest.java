@@ -1,6 +1,3 @@
-/**
- * 
- */
 package service;
 
 import java.util.Date;
@@ -435,4 +432,116 @@ public class ServiceTest {
 		Assert.fail("Exception not thrown!");
 	}
 
+	/**
+	 * @author Tsvetomir Iliev
+	 * @throws InconsistencyException
+	 * @throws OutOfStockSpaceException
+	 */
+	@Test
+	public void testCreateTray() throws OutOfStockSpaceException,
+			InconsistencyException {
+
+		int amount = 0;
+		Set<Tray> trays = Service.createTrays(null, null, amount);
+		Assert.assertEquals(trays, null);
+
+		ProductType productType = new ProductType("Skumbananer");
+		SubProcess sp = new SubProcess(0, "Test", 2, 3, 4);
+		productType.addSubProcess(sp);
+
+		trays = Service.createTrays(productType, null, amount);
+		Assert.assertEquals(trays, null);
+
+		Stock stock = new Stock("Cores Machines", StockType.MACHINE, 1, 150, 1);
+		StorageUnit su = new StorageUnit(stock, 0);
+		stock.addStorageUnit(su);
+		sp.addStock(stock);
+
+		trays = Service.createTrays(productType, stock, amount);
+		Assert.assertNotNull(trays);
+		Assert.assertEquals(trays.size(), 0);
+
+		trays = Service.createTrays(null, stock, amount);
+		Assert.assertEquals(trays, null);
+
+		trays = Service.createTrays(productType, stock, amount);
+		Assert.assertNotNull(trays);
+
+		trays = Service.createTrays(null, stock, amount);
+		Assert.assertEquals(trays, null);
+		/*
+		 * trays = Service.createTrays(productType, stock, amount);
+		 * Assert.assertEquals(trays, null); trays =
+		 * Service.createTrays(productType, stock, amount);
+		 * Assert.assertNotNull(trays);
+		 */
+		trays = Service.createTrays(null, stock, 0);
+		Assert.assertEquals(trays, null);
+
+		trays = Service.createTrays(productType, null, 1);
+		Assert.assertEquals(trays, null);
+
+		stock.removeStorageUnit(su);
+		su = new StorageUnit(stock, 0);
+		stock.addStorageUnit(su);
+
+		trays = Service.createTrays(productType, stock, 0);
+		Assert.assertNotNull(trays);
+
+		trays = Service.createTrays(productType, stock, 15);
+		Assert.assertNotNull(trays);
+
+		stock.removeStorageUnit(su);
+		su = new StorageUnit(stock, 0);
+		stock.addStorageUnit(su);
+
+		trays = Service.createTrays(productType, stock, -15);
+		Assert.assertNotNull(trays);
+
+		stock.removeStorageUnit(su);
+		su = new StorageUnit(stock, 0);
+		stock.addStorageUnit(su);
+
+		trays = Service.createTrays(productType, stock, 75);
+
+		stock.removeStorageUnit(su);
+		su = new StorageUnit(stock, 0);
+		stock.addStorageUnit(su);
+		Assert.assertNotNull(trays);
+
+		trays = Service.createTrays(productType, stock, -1);
+		Assert.assertNotNull(trays);
+
+		stock.removeStorageUnit(su);
+		su = new StorageUnit(stock, 0);
+		stock.addStorageUnit(su);
+
+		try {
+			trays = Service.createTrays(productType, stock, 151);
+			Assert.assertNotNull(trays);
+			Assert.fail();
+		}
+		catch (OutOfStockSpaceException ex) {
+			ex.getMessage();
+		}
+
+		stock.removeStorageUnit(su);
+		su = new StorageUnit(stock, 0);
+		stock.addStorageUnit(su);
+
+		trays = Service.createTrays(productType, stock, -151);
+		Assert.assertNotNull(trays);
+
+		stock.removeStorageUnit(su);
+		su = new StorageUnit(stock, 0);
+		stock.addStorageUnit(su);
+
+		trays = Service.createTrays(productType, stock, 15);
+		Assert.assertNotNull(trays);
+
+		stock.removeStorageUnit(su);
+		su = new StorageUnit(stock, 0);
+		stock.addStorageUnit(su);
+
+	}
 }

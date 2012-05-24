@@ -159,7 +159,7 @@ public class StorageUnitDisplayPanel extends JPanel implements
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		if (this.storageUnit != null) {
+		if (this.storageUnit != null && storageUnit.getStock() != null) {
 			int width = this.getWidth(), height = this.getHeight(), max = storageUnit
 					.getStock().getMaxTraysPerStorageUnit(), unitFieldHeight = height
 					/ max, unitHeight = (int) Math.round(unitFieldHeight * .8), unitWidth = (int) Math

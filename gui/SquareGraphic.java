@@ -1,7 +1,3 @@
-/**
- * @author Ricardas Risys
- */
-
 package gui;
 
 import java.awt.Color;
@@ -16,6 +12,9 @@ import model.Stock;
 import model.StockState;
 import model.StorageUnit;
 
+/**
+ * @author Ricardas Risys
+ */
 public class SquareGraphic extends JPanel {
 
 	private Graphics2D g2d;
@@ -57,7 +56,8 @@ public class SquareGraphic extends JPanel {
 	public void toggleClick() {
 		if (this.isSelected == false) {
 			this.isSelected = true;
-		} else {
+		}
+		else {
 			this.isSelected = false;
 		}
 		repaint();
@@ -80,7 +80,8 @@ public class SquareGraphic extends JPanel {
 			}
 		}
 
-		int percent = 100 - (usedStocks * 100 / stock.getCapacity());
+		int percent = 100 - (usedStocks * 100 / Math
+				.max(1, stock.getCapacity()));
 		String stockInfo = "Name: " + stock.getName() + "<br>";
 		stockInfo += "Remaining Space: " + percent + "%";
 

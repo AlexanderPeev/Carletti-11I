@@ -12,10 +12,14 @@ import model.Tray;
 import model.User;
 
 public abstract class Dao {
+	private static final boolean useJpa = true;
 	private static Dao instance;
 
 	public static Dao getInstance() {
-		if (Dao.instance == null) Dao.instance = new JpaDao();
+		if (Dao.instance == null) {
+			if (useJpa) Dao.instance = new JpaDao();
+			else Dao.instance = new ListDao();
+		}
 		return Dao.instance;
 	}
 

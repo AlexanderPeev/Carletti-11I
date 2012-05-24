@@ -18,7 +18,7 @@ import javax.swing.JTextField;
 import service.Service;
 
 /**
- * A generic purpose login screen.
+ * A general purpose login screen.
  * 
  * @author Alexander Peev
  * 

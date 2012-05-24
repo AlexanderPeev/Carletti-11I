@@ -24,6 +24,14 @@ import javax.swing.event.ListSelectionListener;
 import model.Stock;
 import service.Service;
 
+/**
+ * This dialog is called in order to gather information about the desired
+ * destination Stock and time of picking from the user, in order to pick trays
+ * to their next state in production.
+ * 
+ * @author Alexander Peev
+ * 
+ */
 public class PickTraysDialog extends JDialog {
 	private Set<Stock> stocks = new HashSet<Stock>();
 	private boolean wasAccepted;
@@ -80,6 +88,7 @@ public class PickTraysDialog extends JDialog {
 
 	public void updateDisplay() {
 		this.wasAccepted = false;
+		this.stock = null;
 		this.lstStocks.setListData(this.stocks.toArray());
 		this.txfDate.setText(Service.dateToString(new Date(System
 				.currentTimeMillis())));

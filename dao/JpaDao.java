@@ -7,12 +7,14 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 
 import model.GroupType;
 import model.ProductType;
@@ -182,6 +184,13 @@ public class JpaDao extends Dao {
 		tx.begin();
 		for (Stock s : subProcess.getStocks()) {
 			subProcess.removeStock(s);
+		}
+		TypedQuery<State> q = em.createQuery(
+				"SELECT s FROM states s WHERE s.subProcess=:sp", State.class);
+		q.setParameter("sp", subProcess);
+		List<State> states = q.getResultList();
+		for (State state : states) {
+			em.remove(state);
 		}
 		em.merge(subProcess);
 		em.remove(subProcess);

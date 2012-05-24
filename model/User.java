@@ -1,7 +1,3 @@
-/**
- * @author Ricardas Risys
- */
-
 package model;
 
 import java.util.HashMap;
@@ -16,7 +12,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
-// blue - too early, green - between min-opt, yellow - opt-max, red - waste
+/**
+ * @author Ricardas Risys
+ */
 @Entity(name = "users")
 public class User {
 	@Id

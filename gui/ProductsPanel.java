@@ -20,6 +20,11 @@ import model.ProductType;
 import service.ProductTypeInProductionException;
 import service.Service;
 
+/**
+ * Creates the product type.
+ * 
+ * @author Thomas van Rensburg
+ */
 public class ProductsPanel extends JPanel {
 
 	private MainFrame owner = null;
@@ -29,8 +34,6 @@ public class ProductsPanel extends JPanel {
 	private JList lstProductTypes;
 	private JScrollPane scrollPane;
 	private ProductTypeCUDialog productTypeCUDialog;
-	// private List<ProductType> productTypes = new
-	// ArrayList<ProductType>(Service.getAllProductTypes());
 
 	private final Controller controller = new Controller();
 
@@ -95,11 +98,6 @@ public class ProductsPanel extends JPanel {
 					fillLstProductTypes();
 					lstProductTypes.setSelectedValue(
 							productTypeCUDialog.getProductType(), true);
-					/*
-					 * int lastIndex = lstProductTypes.getModel().getSize() - 1;
-					 * lstProductTypes.setSelectedIndex(lastIndex);
-					 * lstProductTypes.ensureIndexIsVisible(lastIndex);
-					 */
 				}
 			}
 

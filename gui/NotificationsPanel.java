@@ -15,6 +15,14 @@ import model.Stock;
 import model.Tray;
 import service.Service;
 
+/**
+ * Displays notifications about stocks getting full, about aging and wasted
+ * trays. The panel hides automatically if there is nothing important to
+ * display.
+ * 
+ * @author Alexander Peev
+ * 
+ */
 public class NotificationsPanel extends JPanel implements UpdateObserver {
 
 	private MainFrame owner = null;

@@ -1,7 +1,7 @@
 package service;
 
 /**
- * Thrown if wrong data is provided for create/update sub process
+ * Thrown if wrong data is provided for create/update sub process.
  * 
  * @author Ricardas Risys
  * 

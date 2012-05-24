@@ -16,9 +16,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 
 /**
- * 
  * @author Tsvetomir Iliev
- * 
  */
 @Entity(name = "trays")
 public class Tray {
@@ -94,6 +92,9 @@ public class Tray {
 		return new ArrayList<State>(states);
 	}
 
+	/**
+	 * Link is bidirectional and maintained from both sides
+	 */
 	public void addState(State state) {
 		if (!this.states.contains(state)) {
 			this.states.add(state);
@@ -112,6 +113,9 @@ public class Tray {
 		return productType;
 	}
 
+	/**
+	 * Link is bidirectional and maintained from both sides
+	 */
 	public void setProductType(ProductType productType) {
 		if (this.productType == productType) return;
 		if (this.productType != null) {

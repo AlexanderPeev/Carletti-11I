@@ -36,15 +36,13 @@ public class TraysCDialog extends JDialog {
 
 	private MainFrame main = null;
 	private JList lstProduct;
-	private JButton btnCreate;// , btnProcess;
+	private JButton btnCreate;
 	private JPanel pnlButton;
 	private JTextField txfAmount;
 	private JScrollPane jScrollPane1;
 	private JList lstStock;
-	private JLabel lblAmount;// , lblSubProcess;
+	private JLabel lblAmount;
 	private Controller controller = new Controller();
-
-	// private List<Tray> trays = new ArrayList<Tray>();
 
 	public TraysCDialog(MainFrame main) {
 		this.main = main;
@@ -68,29 +66,15 @@ public class TraysCDialog extends JDialog {
 		txfAmount = new JTextField();
 		txfAmount.setPreferredSize(new Dimension(200, 20));
 		pnlButton.add(txfAmount);
-		/*
-		 * btnProcess = new JButton("Show Processes");
-		 * btnProcess.addActionListener(controller); pnlButton.add(btnProcess);
-		 * btnProcess.setPreferredSize(new Dimension(200, 20));
-		 * btnProcess.addActionListener(controller);
-		 */
-		// ListModel lstStockModel = new DefaultComboBoxModel(new String[] {
-		// "Item One", "Item Two" });
 		lstStock = new JList();
 
 		BoxLayout lstStockLayout = new BoxLayout(lstStock,
 				javax.swing.BoxLayout.Y_AXIS);
 		lstStock.setLayout(lstStockLayout);
 		pnlButton.add(lstStock);
-		// lstStock.setModel(lstStockModel);
 		lstStock.addListSelectionListener(controller);
 		lstStock.setPreferredSize(new java.awt.Dimension(192, 75));
 		lstStock.setBorder(new LineBorder(new java.awt.Color(0, 0, 0), 1, false));
-
-		// lblSubProcess = new JLabel();
-		// pnlButton.add(lblSubProcess);
-		// lblSubProcess.setText("Processes");
-		// lblSubProcess.setPreferredSize(new java.awt.Dimension(68, 21));
 
 		btnCreate = new JButton("Create");
 		btnCreate.addActionListener(controller);
@@ -103,14 +87,10 @@ public class TraysCDialog extends JDialog {
 		getContentPane().add(jScrollPane1, BorderLayout.CENTER);
 		jScrollPane1.setPreferredSize(new java.awt.Dimension(494, 479));
 
-		// ListModel jList1Model = new DefaultComboBoxModel(new String[] {
-		// "Item One", "Item Two" });
-
 		lstProduct = new JList();
 		lstProduct.addListSelectionListener(controller);
 		jScrollPane1.setViewportView(lstProduct);
-		// lstProduct.setModel(jList1Model);
-		// lstProduct.setPreferredSize(new java.awt.Dimension(494, 452));
+
 		this.setSize(710, 512);
 		this.setLocationRelativeTo(this.getRootPane());
 		btnCreate.setEnabled(false);
@@ -155,16 +135,6 @@ public class TraysCDialog extends JDialog {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-
-			/*
-			 * if (e.getSource() == btnProcess) { Object sel =
-			 * lstProduct.getSelectedValue(); if (sel != null && sel instanceof
-			 * ProductType) { ProductType p = (ProductType) sel;
-			 * lstStock.setListData(p.getSubProcesses().get(0).getStocks()
-			 * .toArray());
-			 * 
-			 * } } else
-			 */
 			if (e.getSource() == btnCreate) {
 				int amount = 0;
 				try {
